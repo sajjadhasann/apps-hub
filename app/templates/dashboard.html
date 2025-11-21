@@ -1,2 +1,82 @@
-<h1>Welcome to Dashboard</h1>
-<p>You are logged in successfully.</p>
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dashboard</title>
+</head>
+<body class="h-full bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <button onclick="logout()" class="text-red-600 font-semibold hover:underline">
+            Logout
+        </button>
+    </nav>
+
+    <!-- Container -->
+    <div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow">
+
+        <h2 class="text-3xl font-bold mb-6 text-gray-900">Welcome 👋</h2>
+
+        <!-- User Info Cards -->
+        <div class="space-y-4">
+
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <strong class="text-gray-700">Full Name:</strong>
+                <span id="fullName" class="text-gray-900 ml-2">Loading...</span>
+            </div>
+
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <strong class="text-gray-700">Email:</strong>
+                <span id="email" class="text-gray-900 ml-2">Loading...</span>
+            </div>
+
+            <div class="p-4 border rounded-lg bg-gray-50">
+                <strong class="text-gray-700">Role:</strong>
+                <span id="role" class="text-gray-900 ml-2">Loading...</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script>
+        async function loadUser() {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                return window.location.href = "/login";
+            }
+
+            const res = await fetch("/api/auth/me", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            if (!res.ok) {
+                alert("Session expired, please login again.");
+                return logout();
+            }
+
+            const user = await res.json();
+
+            document.getElementById("fullName").innerText = user.full_name;
+            document.getElementById("email").innerText = user.email;
+            document.getElementById("role").innerText = user.role;
+        }
+
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+
+        loadUser();
+    </script>
+
+</body>
+</html>

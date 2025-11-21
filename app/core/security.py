@@ -3,14 +3,15 @@ import jwt
 import os
 import hashlib
 from datetime import datetime, timedelta
+from app.core.config import settings
 
-SECRET_KEY = "YOUR_SECRET_KEY"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+SECRET_KEY = settings.JWT_SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-MAX_BCRYPT_LENGTH = 72 
+# MAX_BCRYPT_LENGTH = 72 
 
 def hash_password(password: str, salt: str = None):
     if not salt:
@@ -29,4 +30,5 @@ def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return token
