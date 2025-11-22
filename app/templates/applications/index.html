@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Applications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <nav class="bg-white shadow p-4 flex justify-between">
+        <h1 class="text-xl font-semibold">Manage Applications</h1>
+        <button onclick="logout()" class="font-semibold hover:underline py-2 px-3 bg-red-300 rounded">Logout</button>
+    </nav>
+
+    <div class="max-w-4xl mx-auto mt-10">
+
+        <div class="flex justify-between mb-5">
+            <h2 class="text-2xl font-bold">Applications</h2>
+            <a href="/applications/create" 
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Create Application
+            </a>
+        </div>
+
+        <table class="min-w-full bg-white rounded shadow">
+            <thead>
+                <tr class="border-b">
+                    <th class="py-2 px-4 text-left">Name</th>
+                    <th class="py-2 px-4 text-left">Category</th>
+                    <th class="py-2 px-4 text-left">Owner</th>
+                    <th class="py-2 px-4 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="appsTable"></tbody>
+        </table>
+    </div>
+
+<script>
+    async function loadApplications() {
+        const token = localStorage.getItem("token");
+        if (!token) return window.location.href = "/login";
+
+        const res = await fetch("/api/applications/", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) {
+            alert("Unauthorized");
+            window.location.href = "/login";
+        }
+
+        const apps = await res.json();
+        const table = document.getElementById("appsTable");
+        console.log("apps: \n", apps);
+        
+        if (apps == 0) {
+            table.innerHTML = `<p class="py-8 text-center">There is no applications, click on 
+                <a href="/applications/create" class="underline">
+                Create Application</a> to start your work</p>`;
+        } else {
+            apps.forEach(app => {
+                table.innerHTML += `
+                    <tr class="border-b">
+                        <td class="py-2 px-4">${app.name}</td>
+                        <td class="py-2 px-4">${app.category}</td>
+                        <td class="py-2 px-4">${app.owner}</td>
+                        <td class="py-2 px-4">
+                            <a href="/applications/edit.html?id=${app.id}" class="text-blue-600 mr-4">Edit</a>
+                            <button onclick="deleteApp(${app.id})" class="text-red-600">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    }
+
+    async function deleteApp(id) {
+        const token = localStorage.getItem("token");
+        if (!confirm("Delete this application?")) return;
+
+        const res = await fetch(`/api/applications/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (res.ok) {
+            alert("Deleted");
+            location.reload();
+        } else {
+            alert("Error deleting");
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    }
+
+    loadApplications();
+</script>
+
+</body>
+</html>

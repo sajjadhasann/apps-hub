@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <div class="max-w-lg mx-auto mt-10 bg-white p-6 rounded shadow">
+        <h2 class="text-2xl font-bold mb-4">Create Application</h2>
+
+        <form id="appForm">
+            <label for="name" class="p-2 w-full mb-2">Application Name</label>
+            <input class="border p-2 w-full mb-3" placeholder="Name" name="name" id="name" required>
+            
+            <label for="category" class="p-2 w-full mb-2">Application Category</label>
+            <select class="border p-2 w-full mb-3" name="category" id="category">
+                <option value="" selected disabled hidden>Category</option>
+                <option value="ERP">ERP</option>
+                <option value="Ticketing">Ticketing</option>
+                <option value="HR">HR</option>
+                <option value="DMS">DMS</option>
+                <option value="Other">Other</option>
+            </select>
+            
+            <label for="owner" class="p-2 w-full mb-2">Application Owner</label>
+            <input type="email" id="owner" class="border p-2 w-full mb-3" placeholder="Owner" name="owner" value="" readonly required/>
+
+            <button class="w-full bg-blue-600 text-white py-2 rounded">Create</button>
+        </form>
+    </div>
+
+<script>
+    (async () => {
+        const token = localStorage.getItem("token");
+        if (!token) window.location.href = "/login";
+
+        const res = await fetch("/api/auth/me", {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        if (!res.ok) {
+            alert("Session expired, please login again.");
+            return logout();
+        }
+
+        const user = await res.json();
+
+        document.querySelector("input[name=owner]").value = user.email;
+    })();
+
+    document.getElementById("appForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const select = document.querySelector("select[name='category']");
+        const value = select.value.trim();
+
+        if (value === "") {
+            e.preventDefault();
+            alert("Please select a category.");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+        if (token) {
+            const form = new FormData(e.target);
+            const body = Object.fromEntries(form.entries());
+            console.log("BODY: ",body);
+            
+            const res = await fetch("/api/applications/create", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                alert("Application created");
+                window.location.href = "/applications";
+            } else if (res.status == 401) {
+                window.location.href = "/login";
+            } else {
+                alert(`Error creating app, ${res.statusText}`);
+            }
+        }
+    });
+
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    };
+</script>
+
+</body>
+</html>

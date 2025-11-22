@@ -10,22 +10,20 @@
 
     <!-- Navbar -->
     <nav class="bg-white shadow p-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-blue-800">Dashboard</h1>
+        <h1 class="text-2xl font-bold text-blue-800">Internal Applications Portal</h1>
         <div class="">
-            <a href="./applications" class="hover:underline px-3">Applications</a>
-            <button onclick="logout()" class="font-semibold hover:underline py-2 px-3 bg-red-300 rounded">
-                Logout
-            </button>
+            <a href="./login" class="hover:underline px-3">Login</a>
+            <a href="./register" class="hover:underline font-semibold py-2 px-3 bg-blue-300 rounded">Sign up</a>
         </div>
     </nav>
 
     <!-- Container -->
-    <div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow">
+    <!-- <div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow"> -->
 
-        <h2 class="text-3xl font-bold mb-6 text-gray-900">Welcome 👋</h2>
+        <!-- <h2 class="text-3xl font-bold mb-6 text-gray-900">Welcome 👋</h2> -->
 
         <!-- User Info Cards -->
-        <div class="space-y-4">
+        <!-- <div class="space-y-4">
 
             <div class="p-4 border rounded-lg bg-gray-50">
                 <strong class="text-gray-700">Full Name:</strong>
@@ -43,13 +41,13 @@
             </div>
 
         </div>
-    </div>
+    </div> -->
 
     <!-- Container -->
-    <div class="max-w-5xl mx-auto mt-10">
+    <!-- <div class="max-w-5xl mx-auto mt-10">
         <h2 class="text-2xl font-bold mb-4">Your Applications</h2>
         <div id="appsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </div>
+    </div> -->
 
     <!-- Script -->
     <script>
@@ -83,7 +81,7 @@
             const token = localStorage.getItem("token");
             if (!token) return window.location.href = "/login";
 
-            const res = await fetch("/api/access/", {
+            const res = await fetch("/api/access", {
                 headers: { "Authorization": "Bearer " + token }
             });
 
@@ -95,7 +93,6 @@
 
             const accessList = await res.json();
 
-            // جلب التطبيقات نفسها
             const apps = [];
             for (let item of accessList) {
                 let r = await fetch(`/api/applications/${item.application_id}`, {
@@ -103,7 +100,8 @@
                 });
                 apps.push(await r.json());
             }
-
+            console.log(apps);
+            
             // ترتيب تنازلي حسب id (الأحدث)
             apps.sort((a, b) => b.id - a.id);
 
@@ -122,13 +120,13 @@
             });
         }
 
-        function logout() {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-        }
+        // function logout() {
+        //     localStorage.removeItem("token");
+        //     window.location.href = "/login";
+        // }
 
-        loadUser();
-        loadApps();
+        // loadUser();
+        // loadApps();
     </script>
 
 </body>

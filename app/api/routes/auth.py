@@ -1,4 +1,3 @@
-# app/api/routes/auth.py
 from fastapi import APIRouter, Depends, Form, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
