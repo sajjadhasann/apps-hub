@@ -1,7 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Form, Depends, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi import Request, Form, Depends
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.core.security import verify_password
@@ -23,7 +22,6 @@ app.include_router(access_router)
 @app.get("/")
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-    # return {"message": "FastAPI Day 1 Ready!"}
 
 @app.get("/login")
 def login_page(request: Request):
@@ -41,6 +39,14 @@ def register(request: Request):
 def applications(request: Request):
     return templates.TemplateResponse("applications/index.html", {"request": request})
 
+@app.get("/applications/app")
+def application(request: Request, id: int = Query(..., alias="id")):
+    return templates.TemplateResponse("applications/app.html", {"request": request, "app_id": id})
+
 @app.get("/applications/create")
 def createApplication(request: Request):
     return templates.TemplateResponse("applications/create.html", {"request": request})
+
+@app.get("/applications/edit")
+def editApplication(request: Request, id: int = Query(..., alias="id")):
+    return templates.TemplateResponse("applications/edit.html", {"request": request, "app_id": id})

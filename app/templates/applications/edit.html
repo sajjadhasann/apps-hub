@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<div class="max-w-lg mx-auto mt-10 bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">Edit Application</h2>
+
+    <form id="editForm">
+        <label class="p-2 w-full mb-2">Application Name</label>
+        <input class="border p-2 w-full mb-3" name="name" id="name" required>
+
+        <label class="p-2 w-full mb-2">Application Category</label>
+        <select class="border p-2 w-full mb-3" name="category" id="category">
+            <option value="ERP">ERP</option>
+            <option value="Ticketing">Ticketing</option>
+            <option value="HR">HR</option>
+            <option value="DMS">DMS</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label class="p-2 w-full mb-2">Application Owner</label>
+        <input type="email" class="border p-2 w-full mb-3 bg-gray-200" id="owner" name="owner" readonly>
+
+        <button class="w-full bg-blue-600 text-white py-2 rounded mt-4" id="saveBtn">Save Changes</button>
+    </form>
+
+    <!-- زر View -->
+    <!-- <button onclick="viewApp()" class="w-full bg-gray-700 text-white py-2 rounded mt-3">
+        View Application
+    </button> -->
+
+    <!-- زر Delete -->
+    <!-- <button onclick="deleteApp()" class="w-full bg-red-600 text-white py-2 rounded mt-3">
+        Delete Application
+    </button> -->
+
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const appId = urlParams.get("id");
+    console.log(appId);
+    console.log(appId);
+    console.log(appId);
+    
+    let currentUser = null;
+    let originalOwner = null;
+    
+    // ================================
+    //   Load logged user
+    // ================================
+    (async function loadUser() {
+        const token = localStorage.getItem("token");
+        if (!token) return window.location.href = "/login";
+
+        const res = await fetch("/api/auth/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) return logout();
+
+        currentUser = await res.json();
+    })();
+
+    // ================================
+    //   Load Application Data
+    // ================================
+    (async function loadApp() {
+        const res = await fetch(`/api/applications/${appId}`);
+        if (!res.ok) {
+            alert("Application not found");
+            return window.location.href = "/applications";
+        }
+
+        const app = await res.json();
+
+        document.getElementById("name").value = app.name;
+        document.getElementById("category").value = app.category;
+        document.getElementById("owner").value = app.owner;
+
+        originalOwner = app.owner;
+
+        // RBAC:
+        // Admin can edit always
+        // Normal user can ONLY edit if they are the owner
+        if (currentUser.role !== "Admin" ) {    //  && currentUser.email !== originalOwner
+            document.getElementById("saveBtn").disabled = true;
+            document.getElementById("saveBtn").classList.add("opacity-50", "cursor-not-allowed");
+
+            alert("You do not have permission to edit. Only the owner or admin can edit this application.");
+        }
+            console.log(currentUser);
+    console.log(originalOwner);
+    })();
+
+    // ================================
+    //   Save Edits
+    // ================================
+    // document.getElementById("editForm").addEventListener("submit", async (e) => {
+    //     e.preventDefault();
+
+    //     // Check RBAC again
+    //     if (currentUser.role !== "admin" && currentUser.email !== originalOwner) {
+    //         return alert("Permission denied.");
+    //     }
+
+    //     const token = localStorage.getItem("token");
+    //     const form = new FormData(e.target);
+    //     const body = Object.fromEntries(form.entries());
+
+    //     const res = await fetch(`/api/applications/update?app_id=${appId}`, {
+    //         method: "PUT",
+    //         headers: {
+    //             "Authorization": "Bearer " + token,
+    //             "Content-Type": "application/json"
+    //         },
+    //         body: JSON.stringify(body)
+    //     });
+
+    //     if (res.ok) {
+    //         alert("Changes saved.");
+    //         window.location.href = "/applications";
+    //     } else {
+    //         alert("Update failed.");
+    //     }
+    // });
+
+    // ================================
+    //   Delete Application
+    // ================================
+    // async function deleteApp() {
+    //     if (!confirm("Are you sure you want to delete this application?")) return;
+
+    //     if (currentUser.role !== "admin") {
+    //         return alert("Only Admin can delete applications.");
+    //     }
+
+    //     const token = localStorage.getItem("token");
+
+    //     const res = await fetch(`/api/applications/delete?id=${appId}`, {
+    //         method: "DELETE",
+    //         headers: {
+    //             "Authorization": "Bearer " + token
+    //         }
+    //     });
+
+    //     if (res.ok) {
+    //         alert("Application deleted.");
+    //         window.location.href = "/applications";
+    //     } else {
+    //         alert("Delete failed.");
+    //     }
+    // }
+
+    // ================================
+    //   View Application
+    // ================================
+    // function viewApp() {
+    //     window.location.href = `/applications/${appId}`;
+    // }
+
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    }
+
+    // INIT
+    // (async () => {
+    //     await loadUser();
+    //     await loadApp();
+    // })();
+</script>
+
+</body>
+</html>

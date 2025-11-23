@@ -21,7 +21,7 @@ def get_db():
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     if not token:
-        raise HTTPException(status_code=401, detail="Missing token")
+        raise HTTPException(status_code=401, detail="Missing session, login again")
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -31,7 +31,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             raise HTTPException(status_code=401, detail="Invalid token payload")
     
     except ExpiredSignatureError as e:
-        raise HTTPException(status_code=401, detail="Token expired:  {e}")
+        raise HTTPException(status_code=401, detail=f"Token expired:  {e}")
     
     except JWTError as e: 
         raise HTTPException(status_code=401, detail=f"Invalid token: {e}")

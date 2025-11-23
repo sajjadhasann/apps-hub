@@ -52,7 +52,6 @@
 
         const apps = await res.json();
         const table = document.getElementById("appsTable");
-        console.log("apps: \n", apps);
         
         if (apps == 0) {
             table.innerHTML = `<p class="py-8 text-center">There is no applications, click on 
@@ -66,7 +65,7 @@
                         <td class="py-2 px-4">${app.category}</td>
                         <td class="py-2 px-4">${app.owner}</td>
                         <td class="py-2 px-4">
-                            <a href="/applications/edit.html?id=${app.id}" class="text-blue-600 mr-4">Edit</a>
+                            <a href="/applications/edit?id=${app.id}" class="text-blue-600 mr-4">Edit</a>
                             <button onclick="deleteApp(${app.id})" class="text-red-600">Delete</button>
                         </td>
                     </tr>

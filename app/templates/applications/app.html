@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<div class="max-w-lg mx-auto mt-10 bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">Application</h2>
+
+    <form id="editForm">
+        <label class="p-2 w-full mb-2">Application Name</label>
+        <input class="border p-2 w-full mb-3" name="name" id="name" required>
+
+        <label class="p-2 w-full mb-2">Application Category</label>
+        <select class="border p-2 w-full mb-3" name="category" id="category">
+            <option value="ERP">ERP</option>
+            <option value="Ticketing">Ticketing</option>
+            <option value="HR">HR</option>
+            <option value="DMS">DMS</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label class="p-2 w-full mb-2">Application Owner</label>
+        <input type="email" class="border p-2 w-full mb-3 bg-gray-200" id="owner" name="owner" readonly>
+
+        <!-- <button class="w-full bg-blue-600 text-white py-2 rounded mt-4" id="saveBtn">Save Changes</button> -->
+    </form>
+
+    <!-- زر Delete -->
+    <!-- <a id="edit_app_link" href="/applications/edit?=" class="w-full bg-red-600 text-white py-2 rounded mt-3">
+        Edit Application
+    </a> -->
+
+</div>
+
+<!-- <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    function getAppIdFromURL(){
+        const pathname = window.location.pathname;
+        const pathSegments = pathname.split('/');
+        const appId = pathSegments.pop();
+        return appId;
+    }
+
+    const appId = getAppIdFromURL();
+    let currentUser = null;
+    let originalOwner = null;
+
+    // ================================
+    //   Load logged user
+    // ================================
+    async function loadUser() {
+        const token = localStorage.getItem("token");
+        if (!token) return window.location.href = "/login";
+
+        const res = await fetch("/api/auth/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) return logout();
+
+        currentUser = await res.json();
+    }
+
+    // ================================
+    //   Load Application Data
+    // ================================
+    async function loadApp() {
+        const res = await fetch(`/api/applications/${appId}`);
+        if (!res.ok) {
+            alert("Application not found");
+            return window.location.href = "/applications";
+        }
+
+        const app = await res.json();
+
+        document.getElementById("name").value = app.name;
+        document.getElementById("category").value = app.category;
+        document.getElementById("owner").value = app.owner;
+        document.getElementById("edit_app_link").href += app.id;
+
+        originalOwner = app.owner;
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    }
+
+    (async () => {
+        await loadUser();
+        await loadApp();
+    })();
+</script> -->
+
+</body>
+</html>

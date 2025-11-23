@@ -44,28 +44,33 @@ def create_application(payload: ApplicationCreate, db: Session = Depends(get_db)
 
 
 @router.get("/{app_id}", response_model=ApplicationOut)
-def get_application(app_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_application(app_id: int, db: Session = Depends(get_db)):        # , current_user = Depends(get_current_user)
+    # print("\n\nAPP ID of GET/app_id \n",app_id,"\n\n")
+    # raise HTTPException(status_code=200, detail=f"Application ID  {app_id}")
     app_obj = db.query(Application).get(app_id)
     if not app_obj:
         raise HTTPException(status_code=404, detail="Application not found")
-    print("\n\nAPP ID: ", app_obj.application_id, "\n\n")
+    print("\n\nAPP ID: ", app_obj, "\n\n")
     return app_obj
 
 
-@router.put("/{app_id}", response_model=ApplicationOut, dependencies=[Depends(require_admin)])
+@router.put("/update{app_id}", response_model=ApplicationOut, dependencies=[Depends(require_admin)])
 def update_application(app_id: int, payload: ApplicationUpdate, db: Session = Depends(get_db)):
     app_obj = db.query(Application).get(app_id)
     if not app_obj:
         raise HTTPException(status_code=404, detail="Application not found")
+    
     for k, v in payload.dict(exclude_unset=True).items():
         setattr(app_obj, k, v)
+    
     db.add(app_obj)
     db.commit()
     db.refresh(app_obj)
+
     return app_obj
 
 
-@router.delete("/{app_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+@router.delete("/delete{app_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
 def delete_application(app_id: int, db: Session = Depends(get_db)):
     app_obj = db.query(Application).get(app_id)
     if not app_obj:
