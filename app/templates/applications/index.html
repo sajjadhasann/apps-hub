@@ -37,6 +37,8 @@
     </div>
 
 <script>
+    let apps = null;
+
     async function loadApplications() {
         const token = localStorage.getItem("token");
         if (!token) return window.location.href = "/login";
@@ -50,7 +52,7 @@
             window.location.href = "/login";
         }
 
-        const apps = await res.json();
+        apps = await res.json();
         const table = document.getElementById("appsTable");
         
         if (apps == 0) {
@@ -58,15 +60,15 @@
                 <a href="/applications/create" class="underline">
                 Create Application</a> to start your work</p>`;
         } else {
-            apps.forEach(app => {
+            apps.forEach((app, i) => {
                 table.innerHTML += `
-                    <tr class="border-b">
-                        <td class="py-2 px-4">${app.name}</td>
+                    <tr class="border-b" app-data="${app.id}">
+                        <td class="py-2 px-4"><a class="hover:underline" href="/applications/app?id=${app.id}">${app.name}</a></td>
                         <td class="py-2 px-4">${app.category}</td>
                         <td class="py-2 px-4">${app.owner}</td>
                         <td class="py-2 px-4">
                             <a href="/applications/edit?id=${app.id}" class="text-blue-600 mr-4">Edit</a>
-                            <button onclick="deleteApp(${app.id})" class="text-red-600">Delete</button>
+                            <button onclick="deleteApp('${i}')" class="text-red-600">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -74,20 +76,26 @@
         }
     }
 
-    async function deleteApp(id) {
+    async function deleteApp(i) {
         const token = localStorage.getItem("token");
-        if (!confirm("Delete this application?")) return;
-
-        const res = await fetch(`/api/applications/${id}`, {
-            method: "DELETE",
-            headers: { "Authorization": "Bearer " + token }
-        });
-
-        if (res.ok) {
-            alert("Deleted");
-            location.reload();
+        
+        if (prompt(`Write 'delete ${apps[i].name}' to confirm`) !== `delete ${apps[i].name}`) {
+            alert("⚠️ Check confirmation and try again !")
         } else {
-            alert("Error deleting");
+            const res = await fetch(`/api/applications/${apps[i].id}`, {
+                method: "DELETE",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (res.ok) {
+                alert("✅ Application deleted successfully.");
+                window.location.href = "/applications";
+            } else if (res.status === 401) {
+                alert("⚠️ Authentication required. Please log in.");
+                window.location.href = "/login";
+            } else {
+                alert(`❌ Error deleting application: ${res.status} ${res.statusText}`);
+            }
         }
     }
 
