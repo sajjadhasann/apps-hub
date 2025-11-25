@@ -24,6 +24,10 @@
             <label class="p-2 w-full">Owner: </label>
             <label class="p-2 w-full font-bold" id="owner"></label>
         </div>
+        <div class="p-4 border rounded-lg bg-gray-50">
+            <label class="p-2 w-full">Status: </label>
+            <label class="p-2 w-full font-bold" id="status"></label>
+        </div>
     </div>
     
     <div class="btns flex justify-between items-center my-4 space-x-2">
@@ -73,6 +77,8 @@
         document.getElementById("name").innerText = app.name;
         document.getElementById("category").innerText = app.category;
         document.getElementById("owner").innerText = app.owner;
+        document.getElementById("status").innerText = app.status;
+        if (app.status == "Active") document.getElementById("status").classList.add("text-green-700");
         document.getElementById("edit_app_link").href += app.id;
 
         originalOwner = app.owner;

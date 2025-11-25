@@ -13,14 +13,39 @@
         <button onclick="logout()" class="font-semibold hover:underline py-2 px-3 bg-red-300 rounded">Logout</button>
     </nav>
 
+
     <div class="max-w-4xl mx-auto mt-10">
 
         <div class="flex justify-between mb-5">
             <h2 class="text-2xl font-bold">Applications</h2>
-            <a href="/applications/create" 
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Create Application
-            </a>
+
+            <div class="flex justify-between space-x-6 ">
+                <form id="searchForm" class="space-x-2">
+                    <input type="text" name="searchTerm" id="searchInput" placeholder="Type app name or owner" class="bg-transparent"/>
+                    
+                    <select name="categoryFilter" id="categoryFilter" class="bg-transparent">
+                        <option value="all">Category</option>
+                        <option value="ERP">ERP</option>
+                        <option value="Ticketing">Ticketing</option>
+                        <option value="HR">HR</option>
+                        <option value="DMS">DMS</option>
+                        <option value="Other">Other</option>
+                    </select>
+    
+                    <select name="statusFilter" id="statusFilter" class="bg-transparent">
+                        <option value="all">Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <!-- <option value="paused">Paused</option>
+                        <option value="canceled">Canceled</option> -->
+                    </select>
+    
+                    <button type="submit">🔍 Search</button>
+                </form>
+    
+                <a href="/applications/create" 
+                    class="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ New</a>
+            </div>
         </div>
 
         <table class="min-w-full bg-white rounded shadow">
@@ -29,6 +54,7 @@
                     <th class="py-2 px-4 text-left">Name</th>
                     <th class="py-2 px-4 text-left">Category</th>
                     <th class="py-2 px-4 text-left">Owner</th>
+                    <th class="py-2 px-4 text-left">Status</th>
                     <th class="py-2 px-4 text-left">Actions</th>
                 </tr>
             </thead>
@@ -39,7 +65,33 @@
 <script>
     let apps = null;
 
-    async function loadApplications() {
+    function loadApps(apps) {
+        const table = document.getElementById("appsTable");
+        table.innerHTML = "";
+
+        if (apps == 0) {
+            table.innerHTML = `<p class="py-8 text-center">There is no applications, click on 
+                <a href="/applications/create" class="underline">
+                Create Application</a> to start your work</p>`;
+        } else {
+            apps.forEach((app, i) => {
+                table.innerHTML += `
+                    <tr class="border-b" app-data="${app.id}">
+                        <td class="py-2 px-4"><a class="hover:underline" href="/applications/app?id=${app.id}">${app.name}</a></td>
+                        <td class="py-2 px-4">${app.category}</td>
+                        <td class="py-2 px-4">${app.owner}</td>
+                        <td class="py-2 px-4 ${app.status == 'Active' ? 'text-green-700' : 'text-gray'}">${app.status}</td>
+                        <td class="py-2 px-4">
+                            <a href="/applications/edit?id=${app.id}" class="text-blue-600 mr-4">Edit</a>
+                            <button onclick="deleteApp('${i}')" class="text-red-600">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    }
+    
+    async function getApplications() {
         const token = localStorage.getItem("token");
         if (!token) return window.location.href = "/login";
 
@@ -53,27 +105,7 @@
         }
 
         apps = await res.json();
-        const table = document.getElementById("appsTable");
-        
-        if (apps == 0) {
-            table.innerHTML = `<p class="py-8 text-center">There is no applications, click on 
-                <a href="/applications/create" class="underline">
-                Create Application</a> to start your work</p>`;
-        } else {
-            apps.forEach((app, i) => {
-                table.innerHTML += `
-                    <tr class="border-b" app-data="${app.id}">
-                        <td class="py-2 px-4"><a class="hover:underline" href="/applications/app?id=${app.id}">${app.name}</a></td>
-                        <td class="py-2 px-4">${app.category}</td>
-                        <td class="py-2 px-4">${app.owner}</td>
-                        <td class="py-2 px-4">
-                            <a href="/applications/edit?id=${app.id}" class="text-blue-600 mr-4">Edit</a>
-                            <button onclick="deleteApp('${i}')" class="text-red-600">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
+        loadApps(apps);
     }
 
     async function deleteApp(i) {
@@ -99,12 +131,46 @@
         }
     }
 
+
+    // SEARCH 
+    document.getElementById("searchForm").addEventListener("submit", async (e) => {
+        e.preventDefault(); searchApp(); });
+
+    async function searchApp() {
+        const searchTerm = document.getElementById('searchInput').value;
+        const selectedCategory = document.getElementById('categoryFilter').value;
+        const selectedStatus = document.getElementById('statusFilter').value;
+
+        const params = new URLSearchParams();
+
+        if (searchTerm) {
+            params.append('search', searchTerm);
+        }
+        if (selectedCategory && selectedCategory !== 'all') {
+            params.append('category', selectedCategory);
+        }
+        if (selectedStatus && selectedStatus !== 'all') {
+            params.append('status', selectedStatus);
+        }
+
+        const apiUrl = `/api/applications?${params.toString()}`;
+
+        const token = localStorage.getItem("token");
+        const res = await fetch(apiUrl, {
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        filteredApps = await res.json();
+        loadApps(filteredApps);
+    }
+
     function logout() {
         localStorage.removeItem("token");
         window.location.href = "/login";
     }
 
-    loadApplications();
+    getApplications();
 </script>
 
 </body>

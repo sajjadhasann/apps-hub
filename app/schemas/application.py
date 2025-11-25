@@ -9,6 +9,12 @@ class AppCategory(str, Enum):
     dms = "DMS"
     other = "Other"
 
+class AppStatus(str, Enum):
+    active = "Active"
+    inactive = "Inactive"
+    # pause = "Pause"
+    # cancel = "Cancel"
+
 class PermissionLevel(str, Enum):
     read = "read"
     write = "write"
@@ -21,11 +27,14 @@ class ApplicationCreate(BaseModel):
 class ApplicationUpdate(BaseModel):
     name: Optional[str]
     category: Optional[AppCategory]
+    status: Optional[AppStatus]
 
 class ApplicationOut(BaseModel):
     id: int
     name: str
     category: AppCategory
+    owner: str
+    status: AppStatus
 
     class Config:
         orm_mode = True

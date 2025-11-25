@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from typing import List, Optional
 from app.db.models.application import Application, ApplicationCategory, ApplicationStatus
 from app.db.models.user import User
@@ -10,19 +11,49 @@ router = APIRouter(prefix="/api/applications", tags=["Applications"])
 
 @router.get("/", response_model=List[ApplicationOut])
 def list_applications(
-    q: Optional[str] = Query(None, description="search by name"),
+    search: Optional[str] = Query(None, description="Search by application name or owner"), 
     category: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)   # any authenticated user can view
+    current_user = Depends(get_current_user)
 ):
     query = db.query(Application)
-    if q:
-        query = query.filter(Application.name.ilike(f"%{q}%"))
+
     if category:
         query = query.filter(Application.category == category)
+        
+    if status:
+        query = query.filter(Application.status == status)
+
+    if search:
+        search_pattern = f"%{search}%"
+        
+        query = query.filter(
+            or_(
+                Application.name.ilike(search_pattern),  
+                Application.owner.ilike(search_pattern) 
+            )
+        )
+    
     apps = query.order_by(Application.name).all()
-    print("\nAPPS: \n", apps[0].owner, "\n\n")
     return apps
+
+
+# @router.get("/", response_model=List[ApplicationOut])
+# def list_applications(
+#     q: Optional[str] = Query(None, description="search by name"),
+#     category: Optional[str] = Query(None),
+#     db: Session = Depends(get_db),
+#     current_user = Depends(get_current_user)   # any authenticated user can view
+# ):
+#     query = db.query(Application)
+#     if q:
+#         query = query.filter(Application.name.ilike(f"%{q}%"))
+#     if category:
+#         query = query.filter(Application.category == category)
+#     apps = query.order_by(Application.name).all()
+#     # print("\nAPPS: \n", apps[0].owner, "\n\n")
+#     return apps
 
 
 @router.post("/create", response_model=ApplicationOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
