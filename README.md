@@ -140,19 +140,23 @@ CREATE DATABASE internal_applications_portal;
 
 Create a file named **`.env`** in the project root directory and populate it with your configuration details.
 
-Ini, TOML
-
-`# --- Database Configuration ---
-# Format: postgresql://USER:PASSWORD@HOST:PORT/DB_NAME
+--- Database Configuration ---
+`Format: postgresql://USER:PASSWORD@HOST:PORT/DB_NAME`
+```Bash
 DATABASE_URL=postgresql://postgres:admin@localhost:5432/internal_applications_portal
+```
 
-# --- JWT Settings ---
+--- JWT Settings ---
+```Bash
 JWT_SECRET_KEY=YOUR_SUPER_SECRET_KEY_HERE # MUST BE CHANGED FOR PRODUCTION
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=60
+```
 
-# --- External API Integration ---
-WEATHER_API_KEY=your_external_api_key_here`
+--- External API Integration ---
+```Bash
+WEATHER_API_KEY=your_external_api_key_here
+```
 
 ---
 
@@ -168,22 +172,21 @@ Alembic is initialized in the `app/db/migrations` directory. Ensure the configur
 
 After defining your SQLAlchemy models (`User`, `Application`, `Ticket`), execute the following commands to create the tables in your PostgreSQL database:
 
-Bash
-
-`# Automatically generate the initial migration script
+```Bash
+# Automatically generate the initial migration script
 alembic revision --autogenerate -m "initial migration: core models setup"
 
 # Apply the migration to the database
 alembic upgrade head`
+```
 
 ### 3. Subsequent Migrations
 
 Whenever you modify any model (e.g., adding a column), run the two commands again:
 
-Bash
-
-`alembic revision --autogenerate -m "descriptive message about changes"
-alembic upgrade head`
+```Bash
+alembic revision --autogenerate -m "descriptive message about changes"
+alembic upgrade head
 
 ---
 
