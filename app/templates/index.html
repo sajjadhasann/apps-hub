@@ -7,7 +7,58 @@
     <title>Internal Applications Portal</title>
 </head>
 <body class="h-full bg-gray-100">
-    
-    <script src="../static/js/navbar.js"></script>
+    <main class="container mx-auto p-6 max-w-5xl">
+        <div class="bg-white p-8 rounded-lg shadow-xl">
+            <h1 class="text-3xl font-bold mb-6 text-indigo-700">Project Overview: Enterprise Application Hub</h1>
+
+            <section class="mb-8 border-b pb-4">
+                <h2 class="text-xl font-semibold mb-3 text-gray-800 flex items-center">
+                    <span class="mr-2">🔗</span> Repository & Technical Assessment Focus
+                </h2>
+                <p class="text-gray-600 mb-4">
+                    This project was developed as a <b>3-Day Technical Assessment for an Enterprise Solutions Developer</b> role, focusing on building a simple full-stack web application demonstrating core enterprise capabilities using Python and PostgreSQL.
+                </p>
+                <a href="https://github.com/sajjadhasann/apps-hub" target="_blank" 
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
+                    View Repository: sajjadhasann/apps-hub 
+                    <span class="ml-2">➡️</span>
+                </a>
+            </section>
+
+            <section class="mb-8 border-b pb-4">
+                <h2 class="text-xl font-semibold mb-3 text-gray-800 flex items-center">
+                    <span class="mr-2">🎯</span> Core Project Deliverables (Full-Stack Requirements)
+                </h2>
+                <p class="text-gray-600">
+                    The primary objective was to implement a secure, full-stack application hub over three daily delivery phases, covering essential components:
+                </p>
+                <ul class="list-disc list-inside mt-3 text-gray-700 space-y-2">
+                    <li><b>Full Stack Architecture</b>: UI (HTML/JS), API (Python Framework), and PostgreSQL Database.</li>
+                    <li><b>Authentication</b>: Secure email + password login/register with JWT-based API protection.</li>
+                    <li><b>Core Models</b>: Users (with Admin/User roles) and Applications (with CRUD management).</li>
+                    <li><b>RBAC (Day 2)</b>: Granular access control for Applications and Users, managed by Admin roles.</li>
+                    <li><b>Tickets & Integration (Day 3)</b>: Support Ticket system and integration with at least one **external REST API**.</li>
+                </ul>
+            </section>
+
+            <section class="mb-4">
+                <h2 class="text-xl font-semibold mb-3 text-gray-800 flex items-center">
+                    <span class="mr-2">🚀</span> Future Vision & Advanced Analytics
+                </h2>
+                <p class="text-gray-600 mb-4">
+                    The next strategic enhancement planned for the Application Hub is the integration of an **AI Agent** for advanced data querying and analysis.
+                </p>
+                <div class="p-4 bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800">
+                    <h3 class="font-semibold mb-1">AI Agent Integration for Internal DB Search</h3>
+                    <p class="text-sm">
+                        This feature will empower users to perform complex, **natural language queries** against the PostgreSQL database (e.g., "Show all open tickets for ERP applications owned by the QA team"). This will utilize an **AI Agent** layer in the backend to translate natural language into SQL, significantly improving reporting and data exploration capabilities beyond standard filters.
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="/static/js/home.js"></script>
+    <script src="/static/js/navbar.js"></script>
 </body>
 </html>

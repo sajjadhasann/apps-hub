@@ -35,75 +35,7 @@
         </form>
     </div>
 
-    <script>
-        (async () => {
-            const token = localStorage.getItem("token");
-            if (!token) window.location.href = "/login";
-
-            const res = await fetch("/api/auth/me", {
-                method: "GET",
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            });
-
-            if (!res.ok) {
-                alert("Session expired, please login again.");
-                return logout();
-            }
-
-            const user = await res.json();
-
-            document.querySelector("input[name=owner]").value = user.email;
-        })();
-
-
-        // ------------ Create App ------------ //
-
-        document.getElementById("appForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            
-            const select = document.querySelector("select[name='category']");
-            const value = select.value.trim();
-
-            if (value === "") {
-                e.preventDefault();
-                alert("Please select a category.");
-                return;
-            }
-
-            const token = localStorage.getItem("token");
-            if (token) {
-                const form = new FormData(e.target);
-                const body = Object.fromEntries(form.entries());
-                console.log("BODY: ",body);
-                
-                const res = await fetch("/api/applications/create", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer " + token,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(body)
-                });
-                if (res.ok) {
-                    alert("🙏 Application created");
-                    window.location.href = "/applications";
-                } else if (res.status == 401) {
-                    window.location.href = "/login";
-                } else if (res.status == 403) {
-                    alert("⚠️ You do'nt have permission to create an application");
-                } else {
-                    alert(`Error creating app, ${res.statusText}`);
-                }
-            }
-        });
-
-        function logout() {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-        };
-    </script>
     <script src="../static/js/navbar.js"></script>
+    <script type="module" src="../static/js/create-app.js"></script>
 </body>
 </html>
