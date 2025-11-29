@@ -8,6 +8,7 @@ from app.db.models.user import User
 from app.api.routes.auth import router as auth_router
 from app.api.routes.applications import router as applications_router
 from app.api.routes.access import router as access_router
+from app.api.routes.users import router as users_router
 
 app = FastAPI()
 
@@ -18,6 +19,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(auth_router)
 app.include_router(applications_router)
 app.include_router(access_router)
+app.include_router(users_router)
 
 @app.get("/")
 def home(request: Request):
@@ -50,3 +52,7 @@ def createApplication(request: Request):
 @app.get("/applications/edit")
 def editApplication(request: Request, id: int = Query(..., alias="id")):
     return templates.TemplateResponse("applications/edit.html", {"request": request, "app_id": id})
+
+@app.get("/access")
+def access(request: Request):
+    return templates.TemplateResponse("access.html", {"request": request})

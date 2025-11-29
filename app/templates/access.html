@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Access Management</title>
+    <style>
+        /*  Action Buttons */
+        .floating-actions {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+        /*  Permissions Coloring  */
+        .role-admin { background-color: #3b82f6; /* Blue-500 */ }
+        .role-edit { background-color: #06b6d4; /* Cyan-500 */ }
+        .role-read { background-color: #f59e0b; /* Amber-500 */ }
+    </style>
+</head>
+<body class="h-full bg-gray-100">
+    <div class="flex h-[calc(100vh-64px)] p-6 space-x-6">
+        
+        <div class="w-1/3 bg-white p-4 rounded-xl shadow-lg flex flex-col">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Applications</h2>
+            
+            <div class="mb-4">
+                <input type="text" id="appSearchInput" placeholder="Search by owner or app name" 
+                       class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" 
+                       oninput="filterApplications()" />
+            </div>
+
+            <div id="applicationsList" class="space-y-3 overflow-y-auto pr-2 flex-grow">
+                <div class="text-center py-10 text-gray-500">Loding...</div>
+            </div>
+        </div>
+
+        <div class="w-2/3 bg-white p-4 rounded-xl shadow-lg flex flex-col relative" id="usersPanel">
+            
+            <h2 class="text-xl font-bold mb-4 text-gray-800" id="usersPanelTitle">
+                Users' access permission of : <span class="font-extrabold text-blue-600" id="selectedAppName">--There is no selected app--</span>
+            </h2>
+
+            <div class="mb-4" id="userSearchContainer" style="display: none;">
+                <input type="text" id="userSearchInput" placeholder="Search by user name or email" 
+                       class="w-full p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" 
+                       oninput="filterUsers()" />
+            </div>
+
+            <div id="usersList" class="space-y-3 overflow-y-auto pr-2 flex-grow">
+                <div class="text-center py-20 text-gray-500">⚠️ Please select an application from the left-hand menu to view and manage user permissions</div>
+            </div>
+
+            <div class="floating-actions bg-white p-4 rounded-t-xl shadow-2xl border-t border-gray-200 space-x-4" id="floatingActions" style="display: none;">
+                <button onclick="cancelChanges()" class="bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-150">
+                    ❌ Cancel changes
+                </button>
+                <button onclick="savePermissions()" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition duration-150">
+                    💾 Save permissions
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- <script>
+        let applications = [];
+        let users = [];
+        let selectedAppId = null;
+        let selectedAppName = '';
+        
+
+        let currentAccesses = {}; 
+        
+        let pendingChanges = {};
+
+
+
+        let allAccesses = [];
+        async function getAllAccesses() {   
+            const token = localStorage.getItem("token");
+            try {
+                const res = await fetch("/api/access/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                console.log(res)
+                if (res.status == 403) {
+                    alert("🗿 You have no permission on this page!");
+                    window.location.href = "/dashboard";
+                } else if (!res.ok) {
+                    throw new Error("Failed to fetch all accesses")
+                }
+                allAccesses = await res.json();
+            } catch (error) {
+                console.error("Error fetching all accesses:", error);
+            }
+        }
+        
+        async function getApplications() {
+            const token = localStorage.getItem("token");
+            if (!token) return window.location.href = "/login";
+
+            const res = await fetch("/api/applications", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            if (res.status == 403) {
+                alert("🗿 You have no permission on this page!");
+                window.location.href = "/dashboard";
+            } else if (!res.ok) {
+                alert("Unauthorized");
+                throw new Error("Failed to fetch all Applications")
+                window.location.href = "/dashboard";
+            }
+            applications = await res.json();
+            loadApplications(applications);
+        }
+
+        async function getUsers() {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                return window.location.href = "/login";
+            }
+
+            const res = await fetch("/api/users", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            if (res.status == 403) {
+                alert("🗿 You have no permission on this page!");
+                return window.location.href = "/dashboard";
+            } else if (!res.ok) {
+                throw new Error("Failed to fetch all Users")
+            }
+
+            users = await res.json();
+        }
+
+        function loadApplications(apps) {
+            const list = document.getElementById("applicationsList");
+            list.innerHTML = "";
+
+            if (apps.length === 0) {
+                list.innerHTML = `<div class="text-center py-10 text-gray-500">No matching applications found.</div>`;
+                return;
+            }
+
+            apps.forEach(app => {
+                const isActive = app.id === selectedAppId ? 'bg-blue-100 border-blue-500' : 'hover:bg-gray-50 border-gray-200';
+                
+                // Style the new Status 
+                const statusColor = app.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700';
+
+                list.innerHTML += `
+                    <div id="app-${app.id}" class="app-item p-3 border-l-4 rounded-lg shadow-sm cursor-pointer ${isActive}" 
+                        data-id="${app.id}" data-name="${app.name}" onclick="selectApplication(${app.id}, '${app.name}')">
+                        
+                        <div class="flex justify-between items-center">
+                            <div class="font-semibold text-gray-900">${app.name}</div>
+                            
+                            <div class="px-3 py-1 text-xs font-medium rounded-full ${statusColor}">
+                                ${app.status}
+                            </div>
+                        </div>
+
+                        <div class="text-sm text-gray-600">Owner: ${app.owner}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterApplications() {
+            const searchTerm = document.getElementById('appSearchInput').value.toLowerCase();
+            const filteredApps = applications.filter(app => 
+                app.name.toLowerCase().includes(searchTerm) || 
+                app.owner.toLowerCase().includes(searchTerm)
+            );            
+            loadApplications(filteredApps); 
+        }
+
+        async function selectApplication(appId, appName) {
+            if (selectedAppId) {
+                const prevApp = document.getElementById(`app-${selectedAppId}`);
+                if(prevApp) prevApp.classList.remove('bg-blue-100', 'border-blue-500');
+            }
+            
+            selectedAppId = appId;
+            selectedAppName = appName;
+            const newApp = document.getElementById(`app-${appId}`);
+            if(newApp) newApp.classList.add('bg-blue-100', 'border-blue-500');
+            
+            document.getElementById('selectedAppName').innerText = appName;
+            document.getElementById('userSearchContainer').style.display = 'block';
+            document.getElementById('floatingActions').style.display = 'flex';
+
+            filterAccessesForSelectedApp(appId);
+        }
+
+        function filterAccessesForSelectedApp(appId) {
+            const list = document.getElementById("usersList");
+            list.innerHTML = `<div class="text-center py-20 text-gray-500">Filtering user permissions...</div>`;
+            
+            currentAccesses = {}; 
+            pendingChanges = {};
+
+            const appAccesses = allAccesses.filter(access => access.application_id === appId);
+            
+            appAccesses.forEach(access => {
+                currentAccesses[access.user_id] = { 
+                    role: access.permission_level, 
+                    accessId: access.id 
+                };
+            });
+            loadUsersForApp(users); 
+        }
+
+
+        function loadUsersForApp(filteredUsers) {
+            const list = document.getElementById("usersList");
+            list.innerHTML = "";
+
+            if (filteredUsers.length === 0) {
+                list.innerHTML = `<div class="text-center py-20 text-gray-500">No matching users found.</div>`;
+                return;
+            }
+
+            filteredUsers.forEach(user => {
+                const access = currentAccesses[user.id] || {};
+                const currentRole = access.role || null;
+                
+                const effectiveRole = pendingChanges[user.id]?.newRole !== undefined 
+                    ? pendingChanges[user.id].newRole 
+                    : currentRole;
+
+                const isAdmin = effectiveRole === 'admin' ? 'checked' : '';
+                const isEdit = effectiveRole === 'write' ? 'checked' : '';
+                const isRead = effectiveRole === 'read' ? 'checked' : '';
+                
+                let roleColorClass = 'border-gray-200'; 
+                
+                if (effectiveRole === 'admin') roleColorClass = 'bg-blue-50 border-blue-200';
+                else if (effectiveRole === 'write') roleColorClass = 'bg-cyan-50 border-cyan-200';
+                else if (effectiveRole === 'read') roleColorClass = 'bg-yellow-50 border-yellow-200';
+
+                 list.innerHTML += `
+                    <div id="user-row-${user.id}" class="p-4 rounded-lg border flex items-center justify-between ${roleColorClass}">
+                        <div class="flex-grow">
+                            <div class="font-semibold text-gray-900">${user.full_name}</div>
+                            <div class="text-sm text-gray-600">${user.email}</div>
+                        </div>
+
+                        <div class="flex items-center space-x-6">
+                            ${renderPermissionCheckbox('admin', user.id, isAdmin)}
+                            ${renderPermissionCheckbox('write', user.id, isEdit)}
+                            ${renderPermissionCheckbox('read', user.id, isRead)}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function renderPermissionCheckbox(role, userId, isChecked) {
+            let labelClass;
+            let titleText = '';
+
+            switch (role) {
+                case 'admin':
+                    labelClass = 'bg-blue-500 hover:bg-blue-600';
+                    titleText = 'Full Administration Permissions';
+                    break;
+                case 'write':
+                    labelClass = 'bg-cyan-500 hover:bg-cyan-600';
+                    titleText = 'Edit and Create Permissions';
+                    break;
+                case 'read':
+                    labelClass = 'bg-yellow-500 hover:bg-yellow-600';
+                    titleText = 'Read Only Permissions';
+                    break;
+            }
+
+            return `
+                <div class="flex flex-col items-center">
+                    <label class="text-xs font-semibold mb-1 text-gray-600">${role}</label>
+                    <label class="${labelClass} relative inline-flex items-center cursor-pointer rounded-full p-1 transition duration-200" title="${titleText}">
+                        <input type="checkbox" data-user-id="${userId}" data-role="${role}" 
+                                ${isChecked} onchange="handlePermissionChange(this, ${userId}, '${role}')" 
+                                class="sr-only peer" />
+                        <div class="w-5 h-5 rounded-full bg-white transition duration-200 peer-checked:bg-opacity-0 peer-checked:translate-x-full"></div>
+                    </label>
+                </div>
+            `;
+        }
+
+        function handlePermissionChange(checkbox, userId, role) {
+            const accessInfo = currentAccesses[userId];
+            const oldRole = accessInfo ? accessInfo.role : null;
+            let newRole = null;
+
+            // 1 (Radio Button)
+            if (checkbox.checked) {
+                ['admin', 'write', 'read'].forEach(r => {
+                    if (r !== role) {
+                        const otherCheckbox = document.querySelector(`input[data-user-id="${userId}"][data-role="${r}"]`);
+                        if (otherCheckbox) otherCheckbox.checked = false;
+                    }
+                });
+                newRole = role; 
+            }
+
+            // 2. Is there change ?
+            const isChangeNeeded = newRole !== oldRole;
+            
+            // 3.Determine pendingChanges (Selecte an API depending on selected option)
+            if (isChangeNeeded) {
+                let actionType;
+                if (oldRole === null && newRole !== null) {
+                    actionType = 'POST'; // Add new permission
+                } else if (oldRole !== null && newRole !== null) {
+                    actionType = 'PUT'; // There is an permission already exist, will be changed
+                } else if (oldRole !== null && newRole === null) {
+                    actionType = 'DELETE'; // There is an permission already exist, will be deleted
+                } else {
+                    delete pendingChanges[userId];
+                    return; 
+                }
+                
+                pendingChanges[userId] = {
+                    action: actionType,
+                    accessId: accessInfo ? accessInfo.accessId : null,
+                    newRole: newRole,
+                    oldRole: oldRole,
+                    userId: userId
+                };
+            } else {
+                delete pendingChanges[userId];
+            }
+            
+            const userRow = document.getElementById(`user-row-${userId}`);
+            if (userRow) {
+                userRow.classList.remove('bg-blue-50', 'bg-cyan-50', 'bg-yellow-50', 'border-blue-200', 'border-cyan-200', 'border-yellow-200');
+                userRow.classList.add('border-gray-200'); 
+
+                let newColorClass = '';
+                let newBorderClass = '';
+
+                const effectiveRole = pendingChanges[userId] ? pendingChanges[userId].newRole : null;
+
+                if (effectiveRole === 'admin') {
+                    newColorClass = 'bg-blue-50';
+                    newBorderClass = 'border-blue-200';
+                } else if (effectiveRole === 'write') {
+                    newColorClass = 'bg-cyan-50';
+                    newBorderClass = 'border-cyan-200';
+                } else if (effectiveRole === 'read') {
+                    newColorClass = 'bg-yellow-50';
+                    newBorderClass = 'border-yellow-200';
+                }
+                
+                if (newColorClass) {
+                    userRow.classList.add(newColorClass);
+                    userRow.classList.add(newBorderClass);
+                }
+            }
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
+            const filteredUsers = users.filter(user => 
+                user.full_name.toLowerCase().includes(searchTerm) || 
+                user.email.toLowerCase().includes(searchTerm)
+            );
+            loadUsersForApp(filteredUsers);
+        }
+
+
+        async function savePermissions() {
+            if (Object.keys(pendingChanges).length === 0) {
+                alert('No changes to save.');
+                return;
+            }
+
+            const token = localStorage.getItem("token");
+            const changes = Object.values(pendingChanges);
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const change of changes) {
+                try {
+                    let url, method, body;
+
+                    if (change.action === 'POST') {
+                        url = '/api/access/';
+                        method = 'POST';
+                        body = { user_id: change.accessId || change.userId, application_id: selectedAppId, permission_level: change.newRole };
+                    } else if (change.action === 'PUT') {
+                        url = `/api/access/${change.accessId}`;
+                        method = 'PUT';
+                        body = { permission_level: change.newRole }; 
+                    } else if (change.action === 'DELETE') {
+                        url = `/api/access/${change.accessId}`;
+                        method = 'DELETE';
+                        body = null;
+                    }
+
+                    const res = await fetch(url, {
+                        method: method,
+                        headers: { 
+                            "Authorization": "Bearer " + token,
+                            "Content-Type": "application/json"
+                        },
+                        body: body ? JSON.stringify(body) : undefined
+                    });
+
+                    if (res.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                        console.error(`❌ Failed to execute ${change.action} for user ${change.userId}: ${res.statusText}`);
+                    }
+
+                } catch (error) {
+                    errorCount++;
+                    console.error(`❌ Error during API call for ${change.action}:`, error);
+                }
+            }
+
+            alert(`✅ Save complete: ${successCount} successful, ${errorCount} failed.`);
+            
+            await getAllAccesses();
+            filterAccessesForSelectedApp(selectedAppId);
+        }
+
+        function cancelChanges() {
+            if (!selectedAppId) return;
+            document.getElementById('userSearchInput').value = '';
+            filterAccessesForSelectedApp(selectedAppId); 
+            alert('Unsaved changes were reverted.');
+        }
+        
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+
+        (async () => {
+            await Promise.all([
+                getApplications(),
+                getUsers()
+            ]);
+            await getAllAccesses();
+        })();
+    </script> -->
+    <script src="../static/js/navbar.js"></script>
+    <script type="module" src="/static/js/access-management.js"></script>
+</body>
+</html>

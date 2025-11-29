@@ -24,6 +24,27 @@ def upgrade() -> None:
     pass
     # ### end Alembic commands ###
 
+# def upgrade() -> None:
+#     """
+#     يضيف خيارات جديدة إلى نوع التعداد 'appstatus' في PostgreSQL.
+#     """
+#     # ⚠️ يجب التأكد من أن اسم التعداد في قاعدة البيانات هو 'appstatus'
+    
+#     # 1. تعريف القيم الجديدة والقديمة
+#     new_status_values = ["Active", "Pause", "Cancel"]
+    
+#     try:
+#         # إضافة 'Pause' (إذا كانت جديدة)
+#         op.execute("ALTER TYPE appstatus ADD VALUE 'Pause'") 
+#     except:
+#         # تجاوز الخطأ إذا كانت القيمة موجودة بالفعل (لتجنب فشل الترحيل)
+#         pass 
+        
+#     try:
+#         # إضافة 'Cancel' (إذا كانت جديدة)
+#         op.execute("ALTER TYPE appstatus ADD VALUE 'Cancel'")
+#     except:
+#         pass
 
 def downgrade() -> None:
     """Downgrade schema."""

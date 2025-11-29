@@ -7,53 +7,188 @@
     <title>Dashboard</title>
 </head>
 <body class="h-full bg-gray-100">
-
-    <!-- Navbar -->
-    <nav class="bg-white shadow p-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-blue-800">Dashboard</h1>
-        <div class="">
-            <a href="./applications" class="hover:underline px-3">Applications</a>
-            <button onclick="logout()" class="font-semibold hover:underline py-2 px-3 bg-red-300 rounded">
-                Logout
-            </button>
-        </div>
-    </nav>
-
     <!-- Container -->
-    <div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow">
+    <div class="max-w-4xl mx-auto my-10 bg-white p-8 rounded-xl shadow">
 
-        <h2 class="text-3xl font-bold mb-6 text-gray-900">Welcome 👋</h2>
+        <h2 class="text-3xl font-bold mb-6 text-gray-900">Welcome,<span id="fullName" class="text-gray-900 ml-2">Loading...</span> 👋</h2>
 
         <!-- User Info Cards -->
         <div class="space-y-4">
-
-            <div class="p-4 border rounded-lg bg-gray-50">
-                <strong class="text-gray-700">Full Name:</strong>
-                <span id="fullName" class="text-gray-900 ml-2">Loading...</span>
-            </div>
-
-            <div class="p-4 border rounded-lg bg-gray-50">
-                <strong class="text-gray-700">Email:</strong>
+            <div class="p-4 border rounded-lg bg-gray-50 flex justify-between">
                 <span id="email" class="text-gray-900 ml-2">Loading...</span>
+                <span id="role" class="text-gray-900 ml-2 rounded-xl px-2" title="Your role">Loading...</span>
             </div>
-
-            <div class="p-4 border rounded-lg bg-gray-50">
-                <strong class="text-gray-700">Role:</strong>
-                <span id="role" class="text-gray-900 ml-2">Loading...</span>
-            </div>
-
         </div>
     </div>
 
-    <!-- Container -->
-    <div class="max-w-5xl mx-auto mt-10">
-        <h2 class="text-2xl font-bold mb-4">Your Applications</h2>
-        <div id="appsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+    <div class="max-w-4xl mx-auto my-10 bg-white p-8 rounded-xl shadow">
+
+        <div class="flex justify-between mb-5">
+            <h2 class="text-2xl font-bold">Your Applications</h2>
+
+            <div class="flex justify-between space-x-6 ">
+                <form id="searchForm" class="space-x-2">
+
+                    <input type="text" name="searchTerm" id="searchInput" placeholder="Type app name or owner" class="bg-transparent" oninput="searchApp()"/>
+                    
+                    <select name="categoryFilter" id="categoryFilter" class="bg-transparent" onchange="searchApp()">
+                        <option value="all">Category</option>
+                        <option value="ERP">ERP</option>
+                        <option value="Ticketing">Ticketing</option>
+                        <option value="HR">HR</option>
+                        <option value="DMS">DMS</option>
+                        <option value="Other">Other</option>
+                    </select>
+    
+                    <select name="statusFilter" id="statusFilter" class="bg-transparent" onchange="searchApp()">
+                        <option value="all">Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <!-- <option value="paused">Paused</option>
+                        <option value="canceled">Canceled</option> -->
+                    </select>
+    
+                    <!-- <button type="submit">🔍 Search</button> -->
+                </form>
+    
+                <a id="createBtn" href="/applications/create" 
+                    class="action-btn-admin bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ New</a>
+            </div>
+        </div>
+
+        <table class="min-w-full bg-white border-b rounded-lg overflow-hidden shadow">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="py-2 px-4 text-left">Name</th>
+                    <th class="py-2 px-4 text-left">Category</th>
+                    <th class="py-2 px-4 text-left">Owner</th>
+                    <th class="py-2 px-4 text-left">Status</th>
+                    <th class="py-2 px-4 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="appsTable"></tbody>
+        </table>
     </div>
 
     <!-- Script -->
-    <script>
-        async function loadUser() {
+    <!-- <script>
+        function setActionLimits() {
+            let btns = Array.from(document.getElementsByClassName("action-btn-admin"))
+
+            btns.forEach(btn=>{
+                btn.classList.add("opacity-50", "cursor-not-allowed");
+                btn.addEventListener("click", e=>{
+                    e.preventDefault();
+                    alert("⚠️ You do'nt have permission to create an application");
+                })
+            });
+        }
+
+        let apps = null;
+        
+        async function loadApps(apps) {
+            const table = document.getElementById("appsTable");
+            table.innerHTML = "";
+
+            if (apps == 0) {
+                table.innerHTML = `<td class="py-8 text-center" colspan="5">There is no applications, click on 
+                    <a href="/applications/create" class="underline">
+                    Create Application</a> to start your work</td>`;
+            } else {
+                apps.forEach((app, i) => {
+                    table.innerHTML += `
+                        <tr class="border-b hover:bg-gray-50" app-data="${app.id}">
+                            <td class="py-2 px-4"><a class="hover:underline" href="/applications/app?id=${app.id}">${app.name}</a></td>
+                            <td class="py-2 px-4">${app.category}</td>
+                            <td class="py-2 px-4">${app.owner}</td>
+                            <td class="py-2 px-4 ${app.status == 'Active' ? 'text-green-700' : 'text-gray'}">${app.status}</td>
+                            <td class="py-2 px-4">
+                                <a href="/applications/edit?id=${app.id}" class="text-blue-600 mr-4 action-btn-admin">Edit</a>
+                                <button onclick="deleteApp('${i}')" class="text-red-600 action-btn-admin">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        };
+
+        async function getApplications(user) {
+            const token = localStorage.getItem("token");
+            if (!token) return window.location.href = "/login";
+
+            const res = await fetch("/api/applications?dashboard=true", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) {
+                alert("Unauthorized");
+                window.location.href = "/login";
+            }
+
+            apps = await res.json();
+            loadApps(apps);
+            if (user.role === "User") setActionLimits();
+        };
+
+        async function searchApp() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const selectedCategory = document.getElementById('categoryFilter').value;
+            const selectedStatus = document.getElementById('statusFilter').value;
+
+            const params = new URLSearchParams();
+
+            if (searchTerm) {
+                params.append('search', searchTerm);
+            }
+            if (selectedCategory && selectedCategory !== 'all') {
+                params.append('category', selectedCategory);
+            }
+            if (selectedStatus && selectedStatus !== 'all') {
+                params.append('status', selectedStatus);
+            }
+
+            const apiUrl = `/api/applications?${params.toString()}`;
+
+            const token = localStorage.getItem("token");
+            const res = await fetch(apiUrl, {
+                method: "GET",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            filteredApps = await res.json();
+            loadApps(filteredApps);
+        }
+
+        async function deleteApp(i) {
+            const token = localStorage.getItem("token");
+            
+            if (prompt(`Write 'delete ${apps[i].name}' to confirm`) !== `delete ${apps[i].name}`) {
+                alert("⚠️ Check confirmation and try again !")
+            } else {
+                const res = await fetch(`/api/applications/${apps[i].id}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": "Bearer " + token }
+                });
+
+                if (res.ok) {
+                    alert("✅ Application deleted successfully.");
+                    window.location.href = "/applications";
+                } else if (res.status === 401) {
+                    alert("⚠️ Authentication required. Please log in.");
+                    window.location.href = "/login";
+                } else {
+                    alert(`❌ Error deleting application: ${res.status} ${res.statusText}`);
+                }
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+
+        (async function loadUser() {
             const token = localStorage.getItem("token");
 
             if (!token) {
@@ -77,59 +212,15 @@
             document.getElementById("fullName").innerText = user.full_name;
             document.getElementById("email").innerText = user.email;
             document.getElementById("role").innerText = user.role;
-        }
+        
+            user.role === "User" ?
+                document.getElementById("role").classList.add("bg-yellow-200") :
+                document.getElementById("role").classList.add("bg-blue-200");
 
-        async function loadApps() {
-            const token = localStorage.getItem("token");
-            if (!token) return window.location.href = "/login";
-
-            const res = await fetch("/api/access/", {
-                headers: { "Authorization": "Bearer " + token }
-            });
-
-            if (!res.ok) {
-                alert("Session expired");
-                localStorage.removeItem("token");
-                return window.location.href = "/login";
-            }
-
-            const accessList = await res.json();
-
-            // جلب التطبيقات نفسها
-            const apps = [];
-            for (let item of accessList) {
-                let r = await fetch(`/api/applications/${item.application_id}`, {
-                    headers: { "Authorization": "Bearer " + token }
-                });
-                apps.push(await r.json());
-            }
-
-            // ترتيب تنازلي حسب id (الأحدث)
-            apps.sort((a, b) => b.id - a.id);
-
-            const container = document.getElementById("appsContainer");
-
-            apps.forEach(app => {
-                container.innerHTML += `
-                    <div class="bg-white p-5 rounded-lg shadow">
-                        <h3 class="text-xl font-bold">${app.name}</h3>
-                        <p class="text-gray-600">${app.description || ""}</p>
-                        <span class="mt-3 inline-block bg-blue-200 text-blue-800 px-3 py-1 rounded text-sm">
-                            ${app.category}
-                        </span>
-                    </div>
-                `;
-            });
-        }
-
-        function logout() {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-        }
-
-        loadUser();
-        loadApps();
-    </script>
-
+            getApplications(user);
+        })();
+    </script> -->
+    <script src="/static/js/navbar.js"></script>
+    <script type="module" src="/static/js/dashboard.js"></script>
 </body>
 </html>

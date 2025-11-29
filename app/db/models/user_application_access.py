@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, ForeignKey, Enum, UniqueConstraint
 from sqlalchemy.orm import relationship
+from app.schemas.application import PermissionLevel
 from app.db.database import Base
+from pydantic import BaseModel
 import enum
 
 class PermissionLevel(enum.Enum):
@@ -19,3 +21,6 @@ class UserApplicationAccess(Base):
 
     user = relationship("User", back_populates="app_accesses")
     application = relationship("Application", back_populates="accesses")
+
+class UserAppAccessUpdate(BaseModel):
+    permission_level: PermissionLevel

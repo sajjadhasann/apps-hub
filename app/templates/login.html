@@ -32,33 +32,6 @@
         </p>
     </div>
 
-    <script>
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const form = e.target;
-            const formData = new FormData(form); 
-
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                body: formData
-            });
-
-            const result = await res.json();
-
-            if (res.ok) {
-                localStorage.setItem("token", result.access_token);
-                alert("Login successful!");
-                window.location.href = "/dashboard";
-            } else {
-                alert(result.detail || "Invalid login");
-            }
-        });
-
-        (async () => {
-            const token = localStorage.getItem("token");
-            if (token) window.location.href = "/dashboard";
-        })();
-    </script>
+    <script type="module" src="/static/js/login.js"></script>
 </body>
 </html>

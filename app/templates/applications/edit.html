@@ -8,141 +8,141 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-<div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow">
-    <h2 class="text-2xl font-bold mb-4">Edit Application</h2>
+    <div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow">
+        <h2 class="text-2xl font-bold mb-4">Edit Application</h2>
 
-    <form id="editForm" class="space-y-4">
-        <div class="space-y-2">
-            <label class="p-2" for="name">Application Name</label>
-            <input class="w-full p-2 border rounded-lg bg-gray-50" name="name" id="name" required>
-        </div>
+        <form id="editForm" class="space-y-4">
+            <div class="space-y-2">
+                <label class="p-2" for="name">Application Name</label>
+                <input class="w-full p-2 border rounded-lg bg-gray-50" name="name" id="name" required>
+            </div>
 
-        <div class="space-y-2">
-            <label class="space-y-2" for="category">Application Category</label>
-            <select class="w-full p-2 border rounded-lg bg-gray-50" name="category" id="category">
-                <option value="ERP">ERP</option>
-                <option value="Ticketing">Ticketing</option>
-                <option value="HR">HR</option>
-                <option value="DMS">DMS</option>
-                <option value="Other">Other</option>
-            </select>
-        </div>
+            <div class="space-y-2">
+                <label class="space-y-2" for="category">Application Category</label>
+                <select class="w-full p-2 border rounded-lg bg-gray-50" name="category" id="category">
+                    <option value="ERP">ERP</option>
+                    <option value="Ticketing">Ticketing</option>
+                    <option value="HR">HR</option>
+                    <option value="DMS">DMS</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
 
-        <div class="space-y-2">
-            <label class="space-y-2" for="status">Application Status</label>
-            <select class="w-full p-2 border rounded-lg bg-gray-50" name="category" id="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-        </div>
+            <div class="space-y-2">
+                <label class="space-y-2" for="status">Application Status</label>
+                <select class="w-full p-2 border rounded-lg bg-gray-50" name="status" id="status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
 
-        <div class="space-y-2">
-            <label class="space-y-2" for="owner">Application Owner</label>
-            <input type="email" class="w-full p-2 border rounded-lg bg-gray-50 text-gray-600" id="owner" name="owner" readonly>
-        </div>
+            <div class="space-y-2">
+                <label class="space-y-2" for="owner">Application Owner</label>
+                <input type="email" class="w-full p-2 border rounded-lg bg-gray-50 text-gray-600" id="owner" name="owner" readonly>
+            </div>
 
-        <div class="btns flex justify-between items-center my-4 space-x-2">
-            <a href="/applications" class="w-full text-center border-b font-bold hover:underline hover:bg-gray-200 px-3 py-2  rounded">Cancel</a>
-            <button class="w-full bg-blue-600 text-white hover:bg-blue-700 py-2 rounded" id="saveBtn">Save Changes</button>
-        </div>
-    </form>
-</div>
+            <div class="btns flex justify-between items-center my-4 space-x-2">
+                <a href="/applications" class="w-full text-center border-b font-bold hover:underline hover:bg-gray-200 px-3 py-2  rounded">Cancel</a>
+                <button class="w-full bg-blue-600 text-white hover:bg-blue-700 py-2 rounded" id="saveBtn">Save Changes</button>
+            </div>
+        </form>
+    </div>
 
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const appId = urlParams.get("id");
-    console.log(appId);
-    console.log(appId);
-    console.log(appId);
-    
-    let currentUser = null;
-    let originalOwner = null;
-    
-    // ================================
-    //   Load logged user
-    // ================================
-    (async function loadUser() {
-        const token = localStorage.getItem("token");
-        if (!token) return window.location.href = "/login";
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const appId = urlParams.get("id");
+        console.log(appId);
+        console.log(appId);
+        console.log(appId);
+        
+        let currentUser = null;
+        let originalOwner = null;
+        
+        // ================================
+        //   Load logged user
+        // ================================
+        (async function loadUser() {
+            const token = localStorage.getItem("token");
+            if (!token) return window.location.href = "/login";
 
-        const res = await fetch("/api/auth/me", {
-            headers: { "Authorization": "Bearer " + token }
+            const res = await fetch("/api/auth/me", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (!res.ok) return logout();
+
+            currentUser = await res.json();
+        })();
+
+        // ================================
+        //   Load Application Data
+        // ================================
+        (async function loadApp() {
+            const res = await fetch(`/api/applications/${appId}`);
+            if (!res.ok) {
+                alert("🔍 Application not found");
+                return window.location.href = "/applications";
+            }
+
+            const app = await res.json();
+
+            document.getElementById("name").value = app.name;
+            document.getElementById("category").value = app.category;
+            document.getElementById("owner").value = app.owner;
+            document.getElementById("status").select = app.status;
+
+            originalOwner = app.owner;
+
+            // RBAC:
+            // Admin can edit always
+            // Normal user can ONLY edit if they are the owner
+            if (currentUser.role !== "Admin" ) {    //  && currentUser.email !== originalOwner
+                document.getElementById("saveBtn").disabled = true;
+                document.getElementById("saveBtn").classList.add("opacity-50", "cursor-not-allowed");
+
+                alert("🗿 You do not have permission to edit. Only the owner or admin can edit this application.");
+            }
+            console.log(currentUser);
+            console.log(originalOwner);
+        })();
+
+        // ================================
+        //   Save Edits
+        // ================================
+        document.getElementById("editForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Check RBAC again
+            if (currentUser.role !== "Admin" && currentUser.email !== originalOwner) {
+                return alert("🗿 Permission denied.");
+            }
+
+            const token = localStorage.getItem("token");
+            const form = new FormData(e.target);
+            const body = Object.fromEntries(form.entries());
+
+            const res = await fetch(`/api/applications/${appId}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                alert("✅ Changes saved.");
+                window.location.href = "/applications";
+            } else {
+                alert("❌ Update failed.");
+            }
         });
 
-        if (!res.ok) return logout();
-
-        currentUser = await res.json();
-    })();
-
-    // ================================
-    //   Load Application Data
-    // ================================
-    (async function loadApp() {
-        const res = await fetch(`/api/applications/${appId}`);
-        if (!res.ok) {
-            alert("🔍 Application not found");
-            return window.location.href = "/applications";
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
         }
-
-        const app = await res.json();
-
-        document.getElementById("name").value = app.name;
-        document.getElementById("category").value = app.category;
-        document.getElementById("owner").value = app.owner;
-        document.getElementById("status").select = app.status;
-
-        originalOwner = app.owner;
-
-        // RBAC:
-        // Admin can edit always
-        // Normal user can ONLY edit if they are the owner
-        if (currentUser.role !== "Admin" ) {    //  && currentUser.email !== originalOwner
-            document.getElementById("saveBtn").disabled = true;
-            document.getElementById("saveBtn").classList.add("opacity-50", "cursor-not-allowed");
-
-            alert("🗿 You do not have permission to edit. Only the owner or admin can edit this application.");
-        }
-        console.log(currentUser);
-        console.log(originalOwner);
-    })();
-
-    // ================================
-    //   Save Edits
-    // ================================
-    document.getElementById("editForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        // Check RBAC again
-        if (currentUser.role !== "Admin" && currentUser.email !== originalOwner) {
-            return alert("🗿 Permission denied.");
-        }
-
-        const token = localStorage.getItem("token");
-        const form = new FormData(e.target);
-        const body = Object.fromEntries(form.entries());
-
-        const res = await fetch(`/api/applications/${appId}`, {
-            method: "PUT",
-            headers: {
-                "Authorization": "Bearer " + token,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-
-        if (res.ok) {
-            alert("✅ Changes saved.");
-            window.location.href = "/applications";
-        } else {
-            alert("❌ Update failed.");
-        }
-    });
-
-    function logout() {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-    }
-</script>
-
+    </script>
+    <script src="../static/js/navbar.js"></script>
 </body>
 </html>

@@ -37,32 +37,6 @@
         </p>
     </div>
 
-    <script>
-        document.getElementById("registerForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const form = e.target;
-            const formData = new FormData(form); 
-
-            const res = await fetch("/api/auth/register", {
-                method: "POST",
-                body: formData
-            });
-
-            const result = await res.json();
-
-            if (res.ok) {
-                alert("Account created!");
-                window.location.href = "/login";
-            } else {
-                alert(result.detail || "Registration failed");
-            }
-        });
-
-        (async () => {
-            const token = localStorage.getItem("token");
-            if (token) window.location.href = "/dashboard";
-        })();
-    </script>
+    <script type="module" src="/static/js/register.js"></script>
 </body>
 </html>
