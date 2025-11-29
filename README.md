@@ -187,6 +187,7 @@ Whenever you modify any model (e.g., adding a column), run the two commands agai
 ```Bash
 alembic revision --autogenerate -m "descriptive message about changes"
 alembic upgrade head
+```
 
 ---
 
