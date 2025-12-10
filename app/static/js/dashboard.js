@@ -43,7 +43,7 @@ async function searchApp() {
 
 async function initializeDashboard() {
     const user = await loadCurrentUser();
-
+    
     if (user) {
         document.getElementById("fullName").innerText = user.full_name;
         document.getElementById("email").innerText = user.email;

@@ -31,6 +31,18 @@ def list_users(
     return users
 
 
+@router.get("/{user_id}", response_model=UserOut)
+def list_users(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user_obj = db.query(User).get(user_id)
+    if not user_obj:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user_obj
+
+
 @router.put("/{user_id}", response_model=UserOut, dependencies=[Depends(require_admin)])
 def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)):
 

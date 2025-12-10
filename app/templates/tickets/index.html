@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support Tickets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS for status badges */
+        .ticket-status-Open { background-color: #fef3c7; color: #b45309; } /* Amber */
+        .ticket-status-In_Progress { background-color: #dbeafe; color: #1e40af; } /* Blue */
+        .ticket-status-Resolved { background-color: #d1fae5; color: #065f46; } /* Green */
+        .status-badge { padding: 4px 8px; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="max-w-5xl mx-auto my-12 bg-white p-6 md:p-10 rounded-xl shadow-2xl">
+
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b pb-4">
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-4 md:mb-0">Support Tickets</h2>
+
+            <div class="flex space-x-4 items-center">
+                
+                <!-- Search and Filter Form -->
+                <div class="flex space-x-2 items-center p-2 border rounded-xl bg-gray-50 shadow-inner">
+                    <input type="text" id="searchInput" placeholder="Search by Title, ID, Creator.." 
+                        class="bg-transparent focus:outline-none text-gray-700 w-32 md:w-48 text-sm" 
+                        oninput="filterTickets()">
+                    
+                    <select id="statusFilter" class="bg-transparent focus:outline-none text-gray-600 text-sm" onchange="filterTickets()">
+                        <option value="all">All Statuses</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </div>
+
+                <!-- Create Button -->
+                <a id="createBtn" href="/tickets/create" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition duration-200 flex items-center text-sm font-semibold">
+                    + New Ticket
+                </a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-lg">
+                <thead>
+                    <tr class="bg-gray-100 border-b-2 border-gray-200 text-gray-600">
+                        <th class="py-3 px-4 text-left font-semibold text-sm rounded-tl-xl">ID</th>
+                        <th class="py-3 px-4 text-left font-semibold text-sm">Title</th>
+                        <th class="py-3 px-4 text-left font-semibold text-sm">Application</th>
+                        <th class="py-3 px-4 text-left font-semibold text-sm">Status</th>
+                        <th class="py-3 px-4 text-left font-semibold text-sm">Created At</th>
+                        <th class="py-3 px-4 text-left font-semibold text-sm rounded-tr-xl">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketsTable">
+                    <!-- Ticket rows will be injected here by JavaScript -->
+                    <tr><td colspan="6" class="p-4 text-center text-gray-500">Loading tickets...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="noTicketsMessage" class="hidden text-center py-10 text-gray-500 text-lg">
+            No tickets found matching your criteria.
+        </div>
+
+    </div>
+
+    <!-- Frontend Script Imports -->
+    <!-- Assuming navbar.js and tickets-index.js handle the UI logic and API calls -->
+    <script src="/static/js/navbar.js"></script>
+    <script type="module" src="/static/js/tickets-index.js"></script>
+</body>
+</html>

@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy import Column, Integer, String, Enum, DateTime
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 import enum
+from sqlalchemy.sql import func
 
 
 class ApplicationCategory(str, enum.Enum):
@@ -13,7 +14,8 @@ class ApplicationCategory(str, enum.Enum):
 
 class ApplicationStatus(str, enum.Enum):
     active = "Active"
-    inactive = "Inactive"
+    pause = "Pause"
+    cancel = "Cancel"
 
 
 class Application(Base):
@@ -24,5 +26,11 @@ class Application(Base):
     category = Column(Enum(ApplicationCategory))
     owner = Column(String)
     status = Column(Enum(ApplicationStatus), default=ApplicationStatus.active)
+    
+    created_at = Column(DateTime, nullable=False, default=func.now())
+    updated_at = Column(DateTime, nullable=False, default=func.now(), onupdate=func.now())
+
 
     accesses = relationship("UserApplicationAccess", back_populates="application")
+    tickets = relationship("Ticket", back_populates="application")
+    

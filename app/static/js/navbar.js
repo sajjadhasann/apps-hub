@@ -9,6 +9,7 @@ function renderNavbar() {
             <a href="/" class="font-semibold hover:underline px-3 text-gray-700">Home</a>
             <a href="/dashboard" class="font-semibold hover:underline px-3 text-gray-700">Dashboard</a>
             <a href="/applications" class="font-semibold hover:underline px-3 text-gray-700">Applications</a>
+            <a href="/tickets" class="font-semibold hover:underline px-3 text-gray-700">Tickets</a>
             <a href="/access" class="font-semibold hover:underline px-3 text-gray-700">Manage Roles</a>
             <button onclick="logout()" class="font-semibold py-2 px-3 bg-red-300 rounded hover:bg-red-500 transition">Logout</button>
         `;

@@ -14,6 +14,7 @@ class UserBase(BaseModel):
 class UserOut(UserBase):
     id: int
     full_name: str
+    email: EmailStr
     role: UserRole
 
 class UserUpdate(BaseModel):

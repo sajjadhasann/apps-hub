@@ -55,57 +55,6 @@ def list_applications(
     return apps
 
 
-# @router.get("/", response_model=List[ApplicationOut])
-# def list_applications(
-#     dashboard: bool = Query(False, description="Set to true to filter only applications owned by the current user"),
-#     search: Optional[str] = Query(None, description="Search by application name or owner"), 
-#     category: Optional[str] = Query(None),
-#     status: Optional[str] = Query(None),
-#     db: Session = Depends(get_db),
-#     current_user = Depends(get_current_user)
-# ):
-#     query = db.query(Application)
-
-#     if dashboard is True:
-#         query = query.filter(Application.owner == current_user.email)
-
-#     if category:
-#         query = query.filter(Application.category == category)
-        
-#     if status:
-#         query = query.filter(Application.status == status)
-
-#     if search:
-#         search_pattern = f"%{search}%"
-        
-#         query = query.filter(
-#             or_(
-#                 Application.name.ilike(search_pattern),  
-#                 Application.owner.ilike(search_pattern) 
-#             )
-#         )
-    
-#     apps = query.order_by(Application.name).all()
-#     return apps
-
-
-# @router.get("/", response_model=List[ApplicationOut])
-# def list_applications(
-#     q: Optional[str] = Query(None, description="search by name"),
-#     category: Optional[str] = Query(None),
-#     db: Session = Depends(get_db),
-#     current_user = Depends(get_current_user)   # any authenticated user can view
-# ):
-#     query = db.query(Application)
-#     if q:
-#         query = query.filter(Application.name.ilike(f"%{q}%"))
-#     if category:
-#         query = query.filter(Application.category == category)
-#     apps = query.order_by(Application.name).all()
-#     # print("\nAPPS: \n", apps[0].owner, "\n\n")
-#     return apps
-
-
 @router.post("/create", response_model=ApplicationOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 def create_application(payload: ApplicationCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     exists = db.query(Application).filter(Application.name==payload.name).first()

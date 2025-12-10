@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, DateTime
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 import enum
-
+from datetime import datetime
+from sqlalchemy.sql import func # server_default=func.now()
 
 class TicketStatus(str, enum.Enum):
     open = "Open"
@@ -20,3 +21,10 @@ class Ticket(Base):
     application_id = Column(Integer, ForeignKey("applications.id"))
     created_by = Column(Integer, ForeignKey("users.id"))
     status = Column(Enum(TicketStatus), default=TicketStatus.open)
+
+    created_at = Column(DateTime, nullable=False, default=func.now())
+    updated_at = Column(DateTime, nullable=False, default=func.now(), onupdate=func.now())
+
+    # ORM relationships
+    creator = relationship("User", back_populates="created_tickets", foreign_keys=[created_by]) 
+    application = relationship("Application", back_populates="tickets", foreign_keys=[application_id])

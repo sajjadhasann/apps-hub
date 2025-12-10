@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/static/css/markdown.css">
+    <style>
+        /* CSS for status badges */
+        .ticket-status-Open { background-color: #fef3c7; color: #b45309; }
+        .ticket-status-In_Progress { background-color: #dbeafe; color: #1e40af; }
+        .ticket-status-Resolved { background-color: #d1fae5; color: #065f46; }
+        .status-badge { padding: 8px 16px; border-radius: 9999px; font-weight: 700; font-size: 1rem; display: inline-block; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="max-w-4xl mx-auto my-12 bg-white p-8 rounded-xl shadow-2xl">
+        <div class="flex justify-between items-start mb-6 border-b pb-4">
+            <h2 class="text-3xl font-bold text-gray-800" id="ticketTitle">Loading Ticket...</h2>
+            <div id="ticketStatusContainer">
+                <!-- Status badge will be injected here by JS -->
+            </div>
+        </div>
+
+        <div class="space-y-6 text-gray-700">
+            <!-- Basic Info Grid -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 border rounded-lg bg-gray-50 shadow-inner">
+                    <p class="text-xs font-medium text-gray-500">Ticket ID</p>
+                    <p class="font-semibold text-lg" id="ticketId"></p>
+                </div>
+                <div class="p-4 border rounded-lg bg-gray-50 shadow-inner">
+                    <p class="text-xs font-medium text-gray-500">Related Application</p>
+                    <p class="font-semibold text-lg" id="applicationId"></p>
+                </div>
+                <div class="p-4 border rounded-lg bg-gray-50 shadow-inner">
+                    <p class="text-xs font-medium text-gray-500">Created By</p>
+                    <p class="font-semibold text-lg" id="createdBy"></p>
+                </div>
+                <div class="p-4 border rounded-lg bg-gray-50 shadow-inner">
+                    <p class="text-xs font-medium text-gray-500">Created At</p>
+                    <p class="font-semibold text-lg" id="createdAt"></p>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="border rounded-xl p-6 bg-white shadow-lg">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800 border-b pb-2">Description</h3>
+                <div id="ticketDescription" class="markdown-preview whitespace-pre-wrap leading-relaxed"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center mt-10 pt-6 border-t">
+            <a href="/tickets" class="text-gray-600 hover:text-blue-600 transition duration-200 flex items-center space-x-1">
+                <span class="font-medium">← Back to List</span>
+            </a>
+            <div class="space-x-3 flex">
+                <!-- Delete button (Admin Only) -->
+                <button id="deleteBtn" class="action-btn-admin bg-red-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-600 transition duration-200 hidden">
+                    Delete
+                </button>
+                <!-- Edit button (Creator or Admin) -->
+                <a id="editBtn" href="#" class="bg-yellow-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-yellow-600 transition duration-200 hidden">
+                    Edit Ticket
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Frontend Script Imports -->
+    <script src="../../static/js/navbar.js"></script>
+    <script type="module" src="/static/js/ticket-details.js"></script>
+</body>
+</html>

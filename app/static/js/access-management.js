@@ -67,6 +67,25 @@ export async function fetchUsersList() {
 }
 
 
+export async function fetchUserById(id) {
+    const token = localStorage.getItem("token");
+    if (!token) return logout();
+
+    const res = await fetch(`/api/users/${id}`, {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (res.status == 403) {
+        alert("🗿 You have no permission on this page!");
+        return window.location.href = "/dashboard";
+    } else if (!res.ok) {
+        throw new Error("Failed to fetch all Users");
+    }
+    return await res.json();
+}
+
+
 export function loadApplicationsList(apps) {
     const list = document.getElementById("applicationsList");
     list.innerHTML = "";

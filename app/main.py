@@ -9,6 +9,7 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.applications import router as applications_router
 from app.api.routes.access import router as access_router
 from app.api.routes.users import router as users_router
+from app.api.routes.tickets import router as tickets_router
 
 app = FastAPI()
 
@@ -20,6 +21,7 @@ app.include_router(auth_router)
 app.include_router(applications_router)
 app.include_router(access_router)
 app.include_router(users_router)
+app.include_router(tickets_router)
 
 @app.get("/")
 def home(request: Request):
@@ -36,6 +38,10 @@ def dashboard(request: Request):
 @app.get("/register")
 def register(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
+
+@app.get("/form")
+def form(request: Request):
+    return templates.TemplateResponse("form.html", {"request": request})
 
 @app.get("/applications")
 def applications(request: Request):
@@ -56,3 +62,20 @@ def editApplication(request: Request, id: int = Query(..., alias="id")):
 @app.get("/access")
 def access(request: Request):
     return templates.TemplateResponse("access.html", {"request": request})
+
+
+@app.get("/tickets")
+def tickets(request: Request):
+    return templates.TemplateResponse("tickets/index.html", {"request": request})
+
+@app.get("/tickets/ticket")
+def ticket(request: Request, id: int = Query(..., alias="id")):
+    return templates.TemplateResponse("tickets/ticket.html", {"request": request, "ticket_id": id})
+
+@app.get("/tickets/create")
+def createTicket(request: Request):
+    return templates.TemplateResponse("tickets/create.html", {"request": request})
+
+@app.get("/tickets/edit")
+def editTicket(request: Request, id: int = Query(..., alias="id")):
+    return templates.TemplateResponse("tickets/edit.html", {"request": request, "ticket_id": id})
