@@ -11,6 +11,37 @@
         <div class="bg-white p-8 rounded-lg shadow-xl">
             <h1 class="text-3xl font-bold mb-6 text-indigo-700">Project Overview: Enterprise Application Hub</h1>
 
+            <!-- AI Assistant Integration Container -->
+            <section class="mb-8 p-6 border border-blue-200 rounded-lg bg-blue-50">
+                <h2 class="text-2xl font-bold mb-4 text-blue-700 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.43 12.56 13 13.25 13 14h-2c0-1.5.5-2.25 1.4-3.15l1.07-1.08c.4-.4.63-.95.63-1.52 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.34 1.68-.88 2.25z"/>
+                    </svg>
+                    AI Assistant: Ask Anything
+                </h2>
+                <form id="aiChatForm" class="flex flex-col sm:flex-row gap-3">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        placeholder="e.g., What are the latest trends in full-stack development?"
+                        required
+                        class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    >
+                    <button 
+                        type="submit" 
+                        id="chatSubmitBtn"
+                        class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Send Query
+                    </button>
+                </form>
+
+                <div id="chatOutput" class="mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-inner min-h-[100px] flex flex-col justify-center">
+                    <p class="text-gray-500 italic text-center">Your AI-powered answers will appear here.</p>
+                </div>
+            </section>
+            <!-- END NEW: AI Assistant Integration Container -->
+
             <section class="mb-8 border-b pb-4">
                 <h2 class="text-xl font-semibold mb-3 text-gray-800 flex items-center">
                     <span class="mr-2">🔗</span> Repository & Technical Assessment Focus
@@ -60,5 +91,6 @@
 
     <script type="module" src="/static/js/home.js"></script>
     <script src="/static/js/navbar.js"></script>
+    <script type="module" src="/static/js/chatbot.js"></script>
 </body>
 </html>

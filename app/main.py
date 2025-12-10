@@ -10,6 +10,7 @@ from app.api.routes.applications import router as applications_router
 from app.api.routes.access import router as access_router
 from app.api.routes.users import router as users_router
 from app.api.routes.tickets import router as tickets_router
+from app.api.routes.chatbot import router as chatbot_router
 
 app = FastAPI()
 
@@ -22,6 +23,7 @@ app.include_router(applications_router)
 app.include_router(access_router)
 app.include_router(users_router)
 app.include_router(tickets_router)
+app.include_router(chatbot_router)
 
 @app.get("/")
 def home(request: Request):

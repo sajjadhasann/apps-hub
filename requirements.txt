@@ -10,3 +10,4 @@ alembic
 pydantic-settings
 PyJWT
 pydantic[email]
+google-genai
