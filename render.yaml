@@ -1,0 +1,16 @@
+# The render.yaml specifies deployment configuration
+services:
+  - type: web
+    name: apps-hub
+    env: python
+    
+    # The build command installs dependencies
+    buildCommand: pip install -r requirements.txt
+    
+    # The start command tells Render how to run your application.
+    # It uses Uvicorn to run the 'app' object inside 'main.py'
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+
+    # Health check for Render to monitor status
+    healthCheckPath: /health

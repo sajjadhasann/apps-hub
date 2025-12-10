@@ -6,13 +6,15 @@ This repository contains the solution for a 3-Day Technical Assessment for an **
 
 The system is designed to manage internal applications, user access, and support tickets, focusing on implementing robust authentication and access control mechanisms as required by the assessment.
 
+**View and test the LIVE version: *https://apps-hub.onrender.com***
+
 ### Key Deliverables:
 
 - **Secure Authentication:** Web login/register (Email + Password) and JWT-based API authentication.
 - **Data Persistence:** Mandatory use of the **PostgreSQL** database.
 - **Role-Based Access Control (RBAC):** Implementing distinct permissions for **Admin** and **User** roles.
 - **Data Management (CRUD):** Full management modules for Applications, Users, and Tickets.
-- **External Integration:** Consumption of at least one external REST API (e.g., a Weather service).
+- **External Integration:** Consumption of one external REST API (Gemini Chatbot).
 
 ---
 
@@ -130,10 +132,10 @@ You must configure the **PostgreSQL** database before running migrations.
 | **Port** | `5432` | Standard PostgreSQL port. |
 | **Database Name** | `internal_applications_portal` | The target database name. |
 
-**Action:** Create the database using your preferred tool (pgAdmin, DBeaver, or psql):
+**Action:** Create the database using your preferred tool (pgAdmin, DBeaver, or psql) or run this line in CLI:
 
-```SQL
-CREATE DATABASE internal_applications_portal;
+```Bash
+python -m app.init_db  
 ```
 
 ### 5. Environment Variables (`.env`)

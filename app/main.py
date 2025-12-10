@@ -1,18 +1,25 @@
 from fastapi import FastAPI, Request, Form, Depends, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
-from app.db.database import SessionLocal
-from app.core.security import verify_password
-from app.db.models.user import User
 from app.api.routes.auth import router as auth_router
 from app.api.routes.applications import router as applications_router
 from app.api.routes.access import router as access_router
 from app.api.routes.users import router as users_router
 from app.api.routes.tickets import router as tickets_router
 from app.api.routes.chatbot import router as chatbot_router
+from starlette.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+# --- FastAPI App Setup ---
+app = FastAPI(title="Enterprise Application Hub")
+
+# Configure CORS (Important for development and flexible deployment)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for simplicity in this example
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 templates = Jinja2Templates(directory="app/templates")
 
