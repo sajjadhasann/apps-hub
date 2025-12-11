@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Form, Depends, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from app.api.routes.auth import router as auth_router
 from app.api.routes.applications import router as applications_router
 from app.api.routes.access import router as access_router
@@ -12,18 +13,22 @@ from starlette.middleware.cors import CORSMiddleware
 # --- FastAPI App Setup ---
 app = FastAPI(title="Enterprise Application Hub")
 
-# Configure CORS (Important for development and flexible deployment)
+
+# --- 1. HEALTH CHECK (MUST BE PRESENT) ---
+# This is what Render checks to ensure service is alive.
+@app.get("/health", include_in_schema=False)
+def health_check():
+    return {"status": "ok"}
+
+
+# --- 2. MIDDLEWARE (Configure CORS) & ROUTERS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for simplicity in this example
+    allow_origins=["*"],    # Allow all origins for simplicity 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-templates = Jinja2Templates(directory="app/templates")
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(auth_router)
 app.include_router(applications_router)
@@ -31,6 +36,15 @@ app.include_router(access_router)
 app.include_router(users_router)
 app.include_router(tickets_router)
 app.include_router(chatbot_router)
+
+
+# --- 3. SERVE STATIC FILES (ADJUST PATHS) ---
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+templates = Jinja2Templates(directory="app/templates")
+
+
+# --- 4. ROUTERS ---
 
 @app.get("/")
 def home(request: Request):
@@ -48,9 +62,6 @@ def dashboard(request: Request):
 def register(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
-@app.get("/form")
-def form(request: Request):
-    return templates.TemplateResponse("form.html", {"request": request})
 
 @app.get("/applications")
 def applications(request: Request):
