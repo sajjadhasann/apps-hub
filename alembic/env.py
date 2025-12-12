@@ -14,6 +14,8 @@ config = context.config
 # This variable is set by Render. If it exists, use it.
 # If not, fall back to the URL defined in alembic.ini (the local URL).
 if os.environ.get("DATABASE_URL"):
+    DB_URL = os.environ.get("DATABASE_URL")
+    
     # If the environment variable is set (on Render deployment), use it.
     # This overrides the local URL defined in alembic.ini.
     config.set_main_option("sqlalchemy.url", os.environ.get("DATABASE_URL"))
@@ -59,6 +61,15 @@ def run_migrations_offline() -> None:
 
     with context.begin_transaction():
         context.run_migrations()
+
+
+if DB_URL:
+    # Append the required SSL parameter to the URL
+    if DB_URL.startswith("postgresql://") and not ("sslmode" in DB_URL):
+        # We append '?sslmode=require' to enforce SSL on the connection.
+        DB_URL += "?sslmode=require"
+    
+    config.set_main_option("sqlalchemy.url", DB_URL)
 
 
 def run_migrations_online() -> None:
