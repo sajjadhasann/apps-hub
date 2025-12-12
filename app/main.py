@@ -11,7 +11,7 @@ from app.api.routes.users import router as users_router
 from app.api.routes.tickets import router as tickets_router
 from app.api.routes.chatbot import router as chatbot_router
 from starlette.middleware.cors import CORSMiddleware
-from init_db import run_migrations 
+from .init_db import run_migrations 
 
 # --- 1. INITIALIZE APP INSTANCE ---
 app = FastAPI(title="Enterprise Application Hub")
