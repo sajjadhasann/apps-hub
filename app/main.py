@@ -1,3 +1,5 @@
+import os
+import sys
 from fastapi import FastAPI, Request, Form, Depends, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -9,19 +11,33 @@ from app.api.routes.users import router as users_router
 from app.api.routes.tickets import router as tickets_router
 from app.api.routes.chatbot import router as chatbot_router
 from starlette.middleware.cors import CORSMiddleware
+from init_db import run_migrations 
 
-# --- FastAPI App Setup ---
+# --- 1. INITIALIZE APP INSTANCE ---
 app = FastAPI(title="Enterprise Application Hub")
 
 
-# --- 1. HEALTH CHECK (MUST BE PRESENT) ---
+# --- 2. CRITICAL DB INITIALIZATION CALL (create_all) ---
+# This block runs synchronously when the 'app.main' module is imported by Uvicorn.
+try:
+    print("Attempting database initialization...")
+    # Call the simple create_all function
+    run_migrations() 
+    print("Database initialization completed successfully.")
+except Exception as e:
+    # If initialization fails (e.g., bad connection string), crash the process.
+    print(f"FATAL ERROR: Database initialization failed. Shutting down service. Error: {e}", file=sys.stderr)
+    sys.exit(1)
+
+
+# --- 3. HEALTH CHECK ---
 # This is what Render checks to ensure service is alive.
 @app.get("/health", include_in_schema=False)
 def health_check():
     return {"status": "ok"}
 
 
-# --- 2. MIDDLEWARE (Configure CORS) & ROUTERS ---
+# --- 4. MIDDLEWARE (Configure CORS) & ROUTERS ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],    # Allow all origins for simplicity 
@@ -38,13 +54,13 @@ app.include_router(tickets_router)
 app.include_router(chatbot_router)
 
 
-# --- 3. SERVE STATIC FILES (ADJUST PATHS) ---
+# --- 5. SERVE STATIC FILES (ADJUST PATHS) ---
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="app/templates")
 
 
-# --- 4. ROUTERS ---
+# --- 6. ROUTERS ---
 
 @app.get("/")
 def home(request: Request):
