@@ -36,7 +36,7 @@ The system is designed to manage internal applications, user access, and support
 The project follows a clean, **Layered Architecture** for scalability and maintainability, ensuring clear **separation of concerns** among API layers, core services (business logic), database logic, and frontend assets.
 
 ```jsx
-fastapi-enterprise/
+apps-hub (root)/
 │
 ├── app/
 │   ├── main.py             # FastAPI entry point, includes main routers

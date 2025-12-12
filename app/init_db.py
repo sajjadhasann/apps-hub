@@ -1,9 +1,14 @@
 import subprocess
 import logging
 import sys
+import os
+
+# Determine the Project Root
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Configure basic logging to see the output in Render logs
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
 
 def run_migrations():
     """Runs Alembic to upgrade the database to the latest revision."""
@@ -15,8 +20,10 @@ def run_migrations():
             ["alembic", "upgrade", "head"],
             check=True, 
             capture_output=True,
-            text=True
+            text=True,
+            cwd=project_root
         )
+
         # Log Alembic's successful output
         logging.info("Alembic STDOUT:\n%s", result.stdout)
         logging.info("--- Database initialization successful ---")

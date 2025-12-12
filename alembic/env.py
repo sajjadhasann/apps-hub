@@ -3,40 +3,57 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
+from dotenv import load_dotenv
+from app.core.config import settings
+from pydantic_settings import BaseSettings 
+from urllib.parse import urlparse
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+
+# this is the Alembic Config object
 config = context.config
 
-
-# --- CRITICAL CHANGE BLOCK ---
-# Get the connection URL from the environment variable (DATABASE_URL) first.
-# This variable is set by Render. If it exists, use it.
-# If not, fall back to the URL defined in alembic.ini (the local URL).
-if os.environ.get("DATABASE_URL"):
-    DB_URL = os.environ.get("DATABASE_URL")
-    
-    # If the environment variable is set (on Render deployment), use it.
-    # This overrides the local URL defined in alembic.ini.
-    config.set_main_option("sqlalchemy.url", os.environ.get("DATABASE_URL"))
-# --- END CRITICAL CHANGE BLOCK ---
-
-
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 target_metadata = None
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+
+# Get the URL from the Pydantic settings object
+DB_URL = settings.DATABASE_URL
+
+# if DB_URL:
+#     # Set the DB URL in Alembic's config object
+#     config.set_main_option("sqlalchemy.url", DB_URL)
+    
+#     # Render Fix: Apply SSL requirement for cloud deployment
+#     if "sslmode" not in DB_URL and DB_URL.startswith("postgresql://"):
+#         config.set_main_option("sqlalchemy.url", DB_URL + "?sslmode=require")
+#     else:
+#          config.set_main_option("sqlalchemy.url", DB_URL)
+
+if DB_URL:
+    parsed_url = urlparse(DB_URL)
+    
+    # Check if the host is a remote cloud host (i.e., not localhost or 127.0.0.1)
+    is_remote_host = parsed_url.hostname not in ['localhost', '127.0.0.1']
+    
+    # Default URL to use in Alembic
+    final_db_url = DB_URL
+    
+    # 1. Apply SSL requirement only for remote hosts
+    if is_remote_host and parsed_url.scheme == 'postgresql' and 'sslmode' not in parsed_url.query:
+        # Append '?sslmode=require' only if it's a remote host and SSL is not already specified
+        final_db_url = f"{DB_URL}?sslmode=require"
+    
+    # 2. If running locally and SSL was required, remove it (or set to disable)
+    elif not is_remote_host and 'sslmode=require' in parsed_url.query:
+        # For local connections, enforce sslmode=disable if sslmode was accidentally set
+        final_db_url = DB_URL.replace("sslmode=require", "sslmode=disable")
+    
+    config.set_main_option("sqlalchemy.url", final_db_url)
+    print(f"Alembic DB URL set to: {final_db_url}") # Helpful for debugging
 
 
 def run_migrations_offline() -> None:
@@ -61,15 +78,6 @@ def run_migrations_offline() -> None:
 
     with context.begin_transaction():
         context.run_migrations()
-
-
-if DB_URL:
-    # Append the required SSL parameter to the URL
-    if DB_URL.startswith("postgresql://") and not ("sslmode" in DB_URL):
-        # We append '?sslmode=require' to enforce SSL on the connection.
-        DB_URL += "?sslmode=require"
-    
-    config.set_main_option("sqlalchemy.url", DB_URL)
 
 
 def run_migrations_online() -> None:
