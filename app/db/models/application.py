@@ -20,7 +20,8 @@ class ApplicationStatus(str, enum.Enum):
 
 class Application(Base):
     __tablename__ = "applications"
-
+    __table_args__ = {'schema': 'public'}
+    
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
     category = Column(Enum(ApplicationCategory))

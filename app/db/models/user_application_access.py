@@ -13,11 +13,14 @@ class PermissionLevel(enum.Enum):
 
 class UserApplicationAccess(Base):
     __tablename__ = "user_application_access"
-    __table_args__ = (UniqueConstraint("user_id", "application_id", name="uix_user_app"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "application_id", name="uix_user_app"),
+        {'schema': 'public'}
+    )
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    application_id = Column(Integer, ForeignKey("applications.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("public.users.id", ondelete="CASCADE"), nullable=False)
+    application_id = Column(Integer, ForeignKey("public.applications.id", ondelete="CASCADE"), nullable=False)
     permission_level = Column(Enum(PermissionLevel), default=PermissionLevel.read, nullable=False)
     
     created_at = Column(DateTime, nullable=False, default=func.now())

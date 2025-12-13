@@ -13,13 +13,14 @@ class TicketStatus(str, enum.Enum):
 
 class Ticket(Base):
     __tablename__ = "tickets"
+    __table_args__ = {'schema': 'public'}
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
 
-    application_id = Column(Integer, ForeignKey("applications.id"))
-    created_by = Column(Integer, ForeignKey("users.id"))
+    application_id = Column(Integer, ForeignKey("public.applications.id"))
+    created_by = Column(Integer, ForeignKey("public.users.id"))
     status = Column(Enum(TicketStatus), default=TicketStatus.open)
 
     created_at = Column(DateTime, nullable=False, default=func.now())
