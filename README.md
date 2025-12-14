@@ -2,7 +2,7 @@
 
 ## 🌟 Project Overview
 
-This repository contains the solution for a 3-Day Technical Assessment for an **Enterprise Solutions Developer** role. The project is a full-stack **Enterprise Application Hub** built using **Python (FastAPI)** and **PostgreSQL**.
+This repository contains the solution for a 3-Day Technical Assessment for an **Enterprise Solutions Developer** role. The project is a full-stack **Enterprise Applications Hub** built using **Python (FastAPI)** and **PostgreSQL**.
 
 The system is designed to manage internal applications, user access, and support tickets, focusing on implementing robust authentication and access control mechanisms as required by the assessment.
 
@@ -14,7 +14,7 @@ The system is designed to manage internal applications, user access, and support
 - **Data Persistence:** Mandatory use of the **PostgreSQL** database.
 - **Role-Based Access Control (RBAC):** Implementing distinct permissions for **Admin** and **User** roles.
 - **Data Management (CRUD):** Full management modules for Applications, Users, and Tickets.
-- **External Integration:** Consumption of one external REST API (Gemini Chatbot).
+- **External Integration:** Consumption of one external REST API **(Gemini Chatbot)**.
 
 ---
 
@@ -69,7 +69,20 @@ apps-hub (root)/
 │   │
 │   ├── templates/          # Jinja2 HTML templates for the Web UI
 │   │   ├── login.html
-│   │   └── dashboard.html
+│   │   ├── dashboard.html
+│   │   ├── <...>.html
+│   │   │
+│   │   ├── applications/
+│   │   │   ├── index.html
+│   │   │   ├── create.html
+│   │   │   ├── edit.html
+│   │   │   └── app.html
+│   │   │
+│   │   └── tickets/
+│   │       ├── index.html
+│   │       ├── create.html
+│   │       ├── edit.html
+│   │       └── ticket.html
 │   │
 │   └── static/             # Frontend assets (CSS/JS)
 │       ├── css/
@@ -92,6 +105,7 @@ Ensure the following tools are installed on your machine:
 * **PostgreSQL** database server
 * **Git**
 
+---
 ### 2. Project Setup
 
 Clone the repository
@@ -113,6 +127,7 @@ Activate the Virtual Environment on macOS/Linux
 source venv/bin/activate
 ```
 
+---
 ### 3. Install Dependencies
 
 Install all required Python packages listed in the `requirements.txt` file:
@@ -120,6 +135,8 @@ Install all required Python packages listed in the `requirements.txt` file:
 ```bash
 pip install -r requirements.txt
 ```
+
+---
 
 ### 4. Database Configuration (PostgreSQL)
 
@@ -132,11 +149,15 @@ You must configure the **PostgreSQL** database before running migrations.
 | **Port** | `5432` | Standard PostgreSQL port. |
 | **Database Name** | `internal_applications_portal` | The target database name. |
 
-**Action:** Create the database using your preferred tool (pgAdmin, DBeaver, or psql) or run this line in CLI:
+**Action:** 
+1. Create the database using your preferred tool (pgAdmin, DBeaver, or psql) 
+2. Run the following line in CLI to initialize tables with its relations:
 
 ```Bash
 python -m app.init_db  
 ```
+
+---
 
 ### 5. Environment Variables (`.env`)
 
@@ -145,19 +166,20 @@ Create a file named **`.env`** in the project root directory and populate it wit
 --- Database Configuration ---
 `Format: postgresql://USER:PASSWORD@HOST:PORT/DB_NAME`
 ```Bash
-DATABASE_URL=postgresql://postgres:admin@localhost:5432/internal_applications_portal
+DATABASE_URL=postgresql://<USER>:<PASSWORD>@localhost:5432/internal_applications_portal
+ADMIN_CREATION_SECRET=<STRING_KEY>
 ```
 
 --- JWT Settings ---
 ```Bash
-JWT_SECRET_KEY=YOUR_SUPER_SECRET_KEY_HERE # MUST BE CHANGED FOR PRODUCTION
+JWT_SECRET_KEY=YOUR_SUPER_SECRET_KEY_HERE
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 ```
 
 --- External API Integration ---
 ```Bash
-WEATHER_API_KEY=your_external_api_key_here
+GEMINI_API_KEY=your_external_api_key_here
 ```
 
 ---
@@ -179,7 +201,7 @@ After defining your SQLAlchemy models (`User`, `Application`, `Ticket`), execute
 alembic revision --autogenerate -m "initial migration: core models setup"
 
 # Apply the migration to the database
-alembic upgrade head`
+alembic upgrade head
 ```
 
 ### 3. Subsequent Migrations
