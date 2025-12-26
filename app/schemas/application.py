@@ -35,9 +35,7 @@ class ApplicationOut(BaseModel):
     category: AppCategory
     owner: str
     status: AppStatus
-
-    class Config:
-        orm_mode = True
+    permission_level: Optional[str] = None 
 
 class UserAppAccessCreate(BaseModel):
     user_id: int
@@ -52,3 +50,4 @@ class UserAppAccessOut(BaseModel):
 
     class Config:
         orm_mode = True
+        from_attributes = True

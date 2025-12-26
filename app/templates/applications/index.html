@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Applications</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../static/css/style.css">
 </head>
 <body class="bg-gray-100 min-h-screen">
-
+    <main class="pt-16 pb-1">
     <div class="max-w-5xl mx-auto my-10 bg-white p-8 rounded-xl shadow">
 
         <div class="flex justify-between mb-5">
@@ -16,9 +17,9 @@
             <div class="flex justify-between space-x-6 ">
                 <form id="searchForm" class="space-x-2">
 
-                    <input type="text" name="searchTerm" id="searchInput" placeholder="Type app name or owner" class="bg-transparent" oninput="searchApp()"/>
+                    <input type="text" name="searchAppInput" id="searchAppInput" placeholder="Search by Title, ID, Owner" class="bg-transparent focus:outline-none text-sm border-b border-transparent focus:border-gray-300 transition-colors" oninput="filterApps()"/>
                     
-                    <select name="categoryFilter" id="categoryFilter" class="bg-transparent" onchange="searchApp()">
+                    <select name="categoryAppFilter" id="categoryAppFilter" class="bg-transparent focus:outline-none text-sm text-gray-600" onchange="filterApps()">
                         <option value="all">Category</option>
                         <option value="ERP">ERP</option>
                         <option value="Ticketing">Ticketing</option>
@@ -27,36 +28,37 @@
                         <option value="Other">Other</option>
                     </select>
     
-                    <select name="statusFilter" id="statusFilter" class="bg-transparent" onchange="searchApp()">
+                    <select name="statusAppFilter" id="statusAppFilter" class="bg-transparent focus:outline-none text-sm text-gray-600" onchange="filterApps()">
                         <option value="all">Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <!-- <option value="paused">Paused</option>
-                        <option value="canceled">Canceled</option> -->
+                        <option value="Active">Active</option>
+                        <option value="Pause">Pause</option>
+                        <option value="Cancel">Cancel</option>
                     </select>
     
                     <!-- <button type="submit">🔍 Search</button> -->
                 </form>
     
                 <a id="createBtn" href="/applications/create" 
-                    class="action-btn-admin bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ New</a>
+                    class="action-btn-admin bg-blue-600 text-white text-sm px-2 py-1 rounded hover:bg-blue-700">+ New</a>
             </div>
         </div>
 
-        <table class="min-w-full bg-gray-50 border rounded-lg overflow-hidden">
+        <table class="min-w-full border border-gray-100 rounded-lg overflow-hidden">
             <thead>
                 <tr class="border-b bg-gray-100">
-                    <th class="py-2 px-4 text-left">Name</th>
+                    <th class="py-2 px-4 text-left">Title</th>
                     <th class="py-2 px-4 text-left">Category</th>
                     <th class="py-2 px-4 text-left">Owner</th>
                     <th class="py-2 px-4 text-left">Status</th>
                     <th class="py-2 px-4 text-left">Actions</th>
                 </tr>
             </thead>
-            <tbody id="appsTable"></tbody>
+            <tbody id="appsTable" class="divide-y divide-gray-300"></tbody>
         </table>
+        
     </div>
-
+    </main>
+    
     <script src="../static/js/navbar.js"></script>
     <script type="module" src="/static/js/applications-index.js"></script>
 </body>

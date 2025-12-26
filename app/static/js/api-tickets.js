@@ -13,27 +13,17 @@ export async function fetchTickets(isDashboardMode = false, params = null) {
     const token = localStorage.getItem("token");
     if (!token) return logout();
 
-    let apiUrl = "/api/tickets/";
-
-    // if (params) {
-        // Construct the API URL with query parameters
-        // const queryString = params.toString();
-        // if (queryString) {
-        //     console.log("query: ",queryString);
-            
-        //     // apiUrl += `?${queryString}`;
-        // }
-    // }
+    let apiUrl = isDashboardMode ? "/api/tickets?dashboard=true" : "/api/tickets";
+    if (params) apiUrl += (isDashboardMode ? '&' : '?') + params.toString();
 
     try {
         const res = await fetch(apiUrl, {
             headers: { "Authorization": "Bearer " + token }
         });
-        // console.log("res: ", res.body);
         
         if (res.status === 401) {
             alert("Unauthorized access. Please log in again.");
-            // logout();
+            logout();
             throw new Error("Unauthorized");
         }
         
@@ -42,15 +32,12 @@ export async function fetchTickets(isDashboardMode = false, params = null) {
         }
 
         ticketsCache = await res.json();
-        // console.log("tickets", ticketsCache);
         
         return ticketsCache;
-
-        // return;
     } catch (error) {
         console.error("Fetch Tickets Error:", error);
         alert("Failed to load tickets. Check console for details.");
-        // logout(); // Logout if fetching fails unexpectedly
+        logout(); // Logout if fetching fails unexpectedly
         throw error;
     }
 }
@@ -109,73 +96,28 @@ export async function deleteTicket(ticketId, ticketTitle) {
 }
 
 
-/**
- * Renders the list of tickets into the HTML table.
- * @param {Array<Object>} tickets - The array of ticket objects to display.
- */
-export function loadTicketsTable(tickets) {
-    const tableBody = document.getElementById("ticketsTable");
-    const noTicketsMessage = document.getElementById("noTicketsMessage");
-    tableBody.innerHTML = "";
-    noTicketsMessage.classList.add("hidden");
+//----- SEARCH FOR TICKET BY API -----//
 
-    if (!tickets || tickets.length === 0) {
-        // If there are no tickets after filtering/loading, display the message.
-        noTicketsMessage.classList.remove("hidden");
-        // Clear the loading message that might be present
-        tableBody.innerHTML = ''; 
-        return;
-    }
+// async function searchTicket() {
+//     const searchTerm = document.getElementById('searchInput').value;
+//     const selectedCategory = document.getElementById('categoryFilter').value;
+//     const selectedStatus = document.getElementById('statusTickrtFilter').value;
 
-    tickets.forEach((ticket, i) => {
-        const statusClass = `ticket-status-${ticket.status.replace(/\s+/g, '_')}`; // e.g., Open -> ticket-status-Open
+//     const params = new URLSearchParams();
+
+//     if (searchTerm) params.append('search', searchTerm);
+//     if (selectedCategory && selectedCategory !== 'all') params.append('category', selectedCategory);
+//     if (selectedStatus && selectedStatus !== 'all') params.append('status', selectedStatus);
+
+//     try {
+//         const filteredApps = await fetchApplications(false, params);
+//         loadAppsTable(filteredApps);
         
-        // Find the index in the *cache* so delete can reference the correct global object
-        const index = ticketsCache.findIndex(cachedTicket => cachedTicket.id === ticket.id);
-        const createdAt = new Date(ticket.created_at).toLocaleString();
-
-        tableBody.innerHTML += `
-            <tr class="border-b hover:bg-gray-50" ticket-data="${ticket.id}">
-                <td class="py-3 px-4 font-mono text-sm">#${ticket.id}</td>
-                <td class="py-3 px-4">
-                    <a class="hover:underline font-medium text-gray-800" href="/tickets/ticket?id=${ticket.id}">${ticket.title}</a>
-                </td>
-                <td class="py-3 px-4 text-sm text-gray-600">${ticket.application_id}</td>
-                <td class="py-3 px-4">
-                    <span class="status-badge ${statusClass}">${ticket.status}</span>
-                </td>
-                <td class="py-3 px-4 text-sm text-gray-500">${createdAt}</td>
-                <td class="py-3 px-4">
-                    <a href="/tickets/edit?id=${ticket.id}" class="text-yellow-600 mr-3 action-btn-admin">Edit</a>
-                    <button onclick="window.deleteTicketByIndex('${index}')" class="text-red-600 action-btn-admin">Delete</button>
-                </td>
-            </tr>
-        `;
-    });
-    
-    // Expose delete function globally for use in inline onclick attribute
-    window.deleteTicketByIndex = (i) => {
-        if (ticketsCache && ticketsCache[i]) {
-            deleteTicket(ticketsCache[i].id, ticketsCache[i].title);
-        } else {
-            alert('Ticket data not found in cache.');
-        }
-    };
-}
-
-
-/**
- * Disables action buttons for users without admin rights.
- * NOTE: This is basic UI disabling. Full permission check must be done server-side.
- */
-export function setActionLimits() {
-    let btns = Array.from(document.getElementsByClassName("action-btn-admin"));
-
-    btns.forEach(btn => {
-        btn.classList.add("opacity-50", "cursor-not-allowed");
-        btn.addEventListener("click", e => {
-            e.preventDefault();
-            alert("⚠️ You don't have permission to perform this action.");
-        });
-    });
-}
+//         const user = await loadCurrentUser(); 
+//         if (user && user.role === "User") {
+//             setActionLimits();
+//         }
+//     } catch (error) {
+//         console.error("Error during application search:", error);
+//     }
+// }

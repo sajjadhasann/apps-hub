@@ -1,5 +1,5 @@
 // login.js
-import { redirectToDashboardIfLoggedIn } from './auth.js';
+import { redirectIfLoggedIn } from './auth.js';
 
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -16,12 +16,12 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     if (res.ok) {
         localStorage.setItem("token", result.access_token);
-        alert("Login successful!");
+        alert("✅ Login successful!");
         window.location.href = "/dashboard";
     } else {
-        alert(result.detail || "Invalid login");
+        alert(result.detail || "⚠️ Invalid login");
     }
 });
 
 // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', redirectToDashboardIfLoggedIn);
+document.addEventListener('DOMContentLoaded', redirectIfLoggedIn("/dashboard"));

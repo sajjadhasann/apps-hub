@@ -1,5 +1,5 @@
 // register.js
-import { redirectToDashboardIfLoggedIn } from './auth.js';
+import { redirectIfLoggedIn } from './auth.js';
 
 const urlParams = new URLSearchParams(window.location.search);
 const adminKey = urlParams.get("admin_key");
@@ -26,11 +26,11 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     const result = await res.json();
 
     if (res.ok) {
-        alert(`OK, ${res.message}`);
+        alert(`✅ OK, ${res.message}`);
         window.location.href = "/login";
     } else {
-        alert(result.detail || "Registration failed");
+        alert(result.detail || "❌ Registration failed");
     }
 });
 
-document.addEventListener('DOMContentLoaded', redirectToDashboardIfLoggedIn);
+document.addEventListener('DOMContentLoaded', redirectIfLoggedIn("/dashboard"));

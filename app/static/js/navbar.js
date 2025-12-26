@@ -21,7 +21,7 @@ function renderNavbar() {
     }
 
     const navbarHTML = `
-        <nav class="bg-white shadow p-4 flex justify-between items-center">
+        <nav class="bg-white shadow p-4 flex justify-between items-center fixed top-0 left-0 w-full border-b border-gray-200 z-50">
             <h1 class="text-2xl font-bold text-blue-800" id="mainPageTitle">
             </h1>
             <div class="flex items-center space-x-2">

@@ -31,4 +31,7 @@ window.cancelChanges = cancelChanges;
 window.handlePermissionChange = handlePermissionChange; 
 window.logout = logout; 
 
-document.addEventListener('DOMContentLoaded', initializeAccessPage);
+// Only add the listener if the active page is Access Management
+if (window.location.pathname.includes('/access')) {
+    document.addEventListener('DOMContentLoaded', initializeAccessPage);
+}

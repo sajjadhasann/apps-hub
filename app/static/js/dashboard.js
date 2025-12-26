@@ -1,12 +1,15 @@
 // dashboard.js
-import { loadCurrentUser, logout } from './auth.js';
-import { fetchApplications, loadAppsTable, setActionLimits } from './api-applications.js';
+import { loadCurrentUser, logout, setActionLimits } from './auth.js';
+import { fetchApplications } from './api-applications.js';
+import { loadAppsTable, filterApps, updateAppsCache } from './applications-index.js';
+import { fetchTickets } from './api-tickets.js';
+import { loadTicketsTable, filterTickets, updateTicketsCache } from './tickets-index.js';
 
-let apps = null; 
 
-async function getApplicationsAndDisplay(user) {
+async function getUserApplicationsAndDisplay(user) {
     try {
-        apps = await fetchApplications(true); 
+        const apps = await fetchApplications(true);
+        updateAppsCache(apps); 
         loadAppsTable(apps);
         
         if (user.role === "User") {
@@ -17,29 +20,21 @@ async function getApplicationsAndDisplay(user) {
     }
 }
 
-async function searchApp() {
-    const searchTerm = document.getElementById('searchInput').value;
-    const selectedCategory = document.getElementById('categoryFilter').value;
-    const selectedStatus = document.getElementById('statusFilter').value;
 
-    const params = new URLSearchParams();
-
-    if (searchTerm) params.append('search', searchTerm);
-    if (selectedCategory && selectedCategory !== 'all') params.append('category', selectedCategory);
-    if (selectedStatus && selectedStatus !== 'all') params.append('status', selectedStatus);
-
+async function getUserTicketsAndDisplay(user) {
     try {
-        const filteredApps = await fetchApplications(false, params);
-        loadAppsTable(filteredApps);
+        const tickets = await fetchTickets(true); 
+        updateTicketsCache(tickets)
+        loadTicketsTable(tickets);
         
-        const user = await loadCurrentUser(); 
-        if (user && user.role === "User") {
+        if (user.role === "User") {
             setActionLimits();
         }
     } catch (error) {
-        console.error("Error during application search:", error);
+        console.error("Error loading tickets:", error);
     }
 }
+
 
 async function initializeDashboard() {
     const user = await loadCurrentUser();
@@ -53,13 +48,18 @@ async function initializeDashboard() {
             document.getElementById("role").classList.add("bg-yellow-200") :
             document.getElementById("role").classList.add("bg-blue-200");
         
-        await getApplicationsAndDisplay(user);
+        getUserApplicationsAndDisplay(user);
+        getUserTicketsAndDisplay(user);
     } else {
-
+        logout()
     }
-}
+};
 
-window.searchApp = searchApp;
-
-document.addEventListener('DOMContentLoaded', initializeDashboard);
 window.logout = logout;
+window.filterApps = filterApps;
+window.filterTickets = filterTickets;
+
+// Only add the listener if the active page is Dashboard
+if (window.location.pathname.includes('/dashboard')) {
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
+}

@@ -1,20 +1,76 @@
 // /js/tickets-index.js
-import { loadCurrentUser, logout } from './auth.js';
-import { fetchTickets, loadTicketsTable, setActionLimits } from './api-tickets.js';
+import { loadCurrentUser, logout, setActionLimits } from './auth.js';
+import { fetchTickets, deleteTicket } from './api-tickets.js';
 
-// Expose logout to global scope for HTML calls
-window.logout = logout;
 
 let currentUser = null;
 let allTicketsCache = [];
+
+export function updateTicketsCache(tickets) {
+    allTicketsCache = tickets;
+}
+
+/**
+ * Renders the list of tickets into the HTML table.
+ * @param {Array<Object>} tickets - The array of ticket objects to display.
+ */
+export function loadTicketsTable(tickets) {
+    const tableBody = document.getElementById("ticketsTable");
+    const noTicketsMessage = document.getElementById("noTicketsMessage");
+    tableBody.innerHTML = "";
+    noTicketsMessage.classList.add("hidden");
+
+    if (!tickets || tickets.length === 0) {
+        // If there are no tickets after filtering/loading, display the message.
+        noTicketsMessage.classList.remove("hidden");
+        // Clear the loading message that might be present
+        tableBody.innerHTML = ''; 
+        return;
+    }
+
+    tickets.forEach((ticket, i) => {
+        const statusClass = `ticket-status-${ticket.status.replace(/\s+/g, '_')}`; // e.g., Open -> ticket-status-Open
+        
+        // Find the index in the *cache* so delete can reference the correct global object
+        // const index = allTicketsCache.findIndex(cachedTicket => cachedTicket.id === ticket.id);
+        const createdAt = new Date(ticket.created_at).toLocaleString();
+
+        tableBody.innerHTML += `
+            <tr class="hover:bg-gray-50" ticket-data="${ticket.id}">
+                <td class="py-3 px-4 font-mono text-sm">#${ticket.id}</td>
+                <td class="py-3 px-4">
+                    <a class="hover:underline font-medium text-gray-800" href="/tickets/ticket?id=${ticket.id}">${ticket.title}</a>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-600">${ticket.application_id}</td>
+                <td class="py-3 px-4">
+                    <span class="status-badge ${statusClass}">${ticket.status}</span>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-500">${createdAt}</td>
+                <td class="py-3 px-4">
+                    <a href="/tickets/edit?id=${ticket.id}" class="text-yellow-600 mr-3 action-btn-admin">Edit</a>
+                    <button onclick="window.deleteTicketByIndex('${i}')" class="text-red-600 action-btn-admin">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    // Expose delete function globally for use in inline onclick attribute
+    window.deleteTicketByIndex = (i) => {
+        if (allTicketsCache && allTicketsCache[i]) {
+            deleteTicket(allTicketsCache[i].id, allTicketsCache[i].title);
+        } else {
+            alert('Ticket data not found in cache.');
+        }
+    };
+}
 
 /**
  * Fetches tickets based on the provided URL parameters and updates the UI.
  * @param {URLSearchParams | null} params - Optional URLSearchParams object for filtering.
  */
-async function getTicketsAndDisplay(params = null) {
+async function getTicketsAndDisplay(isDashboardMode = false,params = null) {
     try {
-        const tickets = await fetchTickets(false, params); 
+        const tickets = await fetchTickets(isDashboardMode, params); 
         allTicketsCache = tickets;
         loadTicketsTable(tickets);
         
@@ -27,21 +83,19 @@ async function getTicketsAndDisplay(params = null) {
         // fetchTickets already handles logout on 401
     }
 }
+
 /**
  * Collects current filter values from the UI, filters the local cache (allTicketsCache), 
  * and updates the table. This is now 100% client-side filtering.
  */
-async function filterTickets() {
+export async function filterTickets() {
     // Get filter values and normalize search term for case-insensitive matching
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-    const selectedStatus = document.getElementById('statusFilter').value; // e.g., "Open" or "all"
-    
-    console.log("\n\nsearching: ", searchTerm);
-    
-    // Start filtering from the complete cached list
-    // let filteredTickets = allTicketsCache;
-    let filteredTickets = allTicketsCache;
+    const searchTerm = document.getElementById('searchTicketInput').value.toLowerCase().trim();
+    const selectedStatus = document.getElementById('statusTicketFilter').value;
 
+    // Start filtering from the complete cached list
+    let filteredTickets = allTicketsCache;
+    
     // 1. Filter by Status (unless 'all' is selected)
     if (selectedStatus && selectedStatus !== 'all') {
         filteredTickets = filteredTickets.filter(ticket => 
@@ -61,7 +115,6 @@ async function filterTickets() {
             return titleMatch || descriptionMatch || ticketId || applicationId || userId;
         });
     }
-    console.log("\nfilltered tickets " , filteredTickets, "\n");
     
     // 3. Display the resulting filtered subset
     loadTicketsTable(filteredTickets);
@@ -81,11 +134,17 @@ async function initializeTicketsPage() {
     currentUser = await loadCurrentUser();
     if (currentUser) {
         // Load all tickets initially (params=null)
-        await getTicketsAndDisplay(null);
+        getTicketsAndDisplay();
+    } else {
+        logout();
     }
 }
 
 // Expose filtering function globally for HTML inline event listeners
 window.filterTickets = filterTickets; 
+window.logout = logout;
 
-document.addEventListener('DOMContentLoaded', initializeTicketsPage);
+// Only add the listener if the active page is Tickets
+if (window.location.pathname.includes('/tickets')) {
+    document.addEventListener('DOMContentLoaded', initializeTicketsPage);
+}

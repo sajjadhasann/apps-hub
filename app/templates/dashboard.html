@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Dashboard</title>
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 <body class="h-full bg-gray-100">
+    <main class="pt-16 pb-1">
     <!-- Container -->
     <div class="max-w-4xl mx-auto my-10 bg-white p-8 rounded-xl shadow">
 
@@ -30,9 +32,9 @@
             <div class="flex justify-between space-x-6 ">
                 <form id="searchForm" class="space-x-2">
 
-                    <input type="text" name="searchTerm" id="searchInput" placeholder="Type app name or owner" class="bg-transparent" oninput="searchApp()"/>
+                    <input type="text" name="searchAppInput" id="searchAppInput" placeholder="Search by Title, ID, Owner" class="bg-transparent focus:outline-none text-sm border-b border-transparent focus:border-gray-300 transition-colors" oninput="filterApps()"/>
                     
-                    <select name="categoryFilter" id="categoryFilter" class="bg-transparent" onchange="searchApp()">
+                    <select name="categoryAppFilter" id="categoryAppFilter" class="bg-transparent focus:outline-none text-sm text-gray-600" onchange="filterApps()">
                         <option value="all">Category</option>
                         <option value="ERP">ERP</option>
                         <option value="Ticketing">Ticketing</option>
@@ -41,35 +43,86 @@
                         <option value="Other">Other</option>
                     </select>
     
-                    <select name="statusFilter" id="statusFilter" class="bg-transparent" onchange="searchApp()">
+                    <select name="statusAppFilter" id="statusAppFilter" class="bg-transparent focus:outline-none text-sm text-gray-600" onchange="filterApps()">
                         <option value="all">Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <!-- <option value="paused">Paused</option>
-                        <option value="canceled">Canceled</option> -->
+                        <option value="Active">Active</option>
+                        <option value="Pause">Pause</option>
+                        <option value="Cancel">Cancel</option>
                     </select>
     
                     <!-- <button type="submit">🔍 Search</button> -->
                 </form>
     
                 <a id="createBtn" href="/applications/create" 
-                    class="action-btn-admin bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">+ New</a>
+                    class="action-btn-admin bg-blue-600 text-white text-sm px-2 py-1 rounded hover:bg-blue-700">+ New</a>
             </div>
         </div>
 
-        <table class="min-w-full bg-white border-b rounded-lg overflow-hidden shadow">
-            <thead>
+        <table class="min-w-full border rounded-lg overflow-hidden">
+            <thead class="border-b">
                 <tr class="bg-gray-50">
-                    <th class="py-2 px-4 text-left">Name</th>
-                    <th class="py-2 px-4 text-left">Category</th>
-                    <th class="py-2 px-4 text-left">Owner</th>
-                    <th class="py-2 px-4 text-left">Status</th>
-                    <th class="py-2 px-4 text-left">Actions</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Title</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Category</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Owner</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Status</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Actions</th>
                 </tr>
             </thead>
-            <tbody id="appsTable"></tbody>
+            <tbody id="appsTable" class="divide-y divide-gray-300"></tbody>
         </table>
     </div>
+
+    <div class="max-w-4xl mx-auto my-10 bg-white p-8 rounded-xl shadow">
+
+        <div class="flex justify-between mb-5">
+            <h2 class="text-2xl font-bold">Your Tickets</h2>
+
+            <div class="flex justify-between space-x-6">
+                <form id="searchForm" class="space-x-2" onsubmit="event.preventDefault();">
+                    <input type="text" name="searchTicketInput" id="searchTicketInput" 
+                        placeholder="Search by Title, ID, Creator" 
+                        class="bg-transparent focus:outline-none text-sm border-b border-transparent focus:border-gray-300 transition-colors" 
+                        oninput="filterTickets()"/>
+                    
+                    <select name="statusTicketFilter" id="statusTicketFilter" class="bg-transparent focus:outline-none text-sm text-gray-600" onchange="filterTickets()">
+                        <option value="all">Status</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+                </form>
+
+                <a id="createBtn" href="/tickets/create" 
+                    class="action-btn-admin bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 text-sm flex items-center">
+                    + New
+                </a>
+            </div>
+        </div>
+
+        <table class="min-w-full border rounded-lg overflow-hidden">
+            <thead class="border-b">
+                <tr class="bg-gray-100">
+                    <th class="py-2 px-4 text-left text-sm font-semibold">ID</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Title</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Application</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Status</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Created At</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ticketsTable" class="overflow-x-auto divide-y divide-gray-300">
+                <!-- Loading state matches your apps table logic -->
+                <tr>
+                    <td colspan="6" class="py-8 text-center text-gray-500">Loading tickets...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="noTicketsMessage" class="hidden text-center py-10 text-gray-500 text-lg">
+            No tickets found matching your criteria.
+        </div>
+    </div>
+    </main>
 
     <script src="/static/js/navbar.js"></script>
     <script type="module" src="/static/js/dashboard.js"></script>

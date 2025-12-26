@@ -1,0 +1,10 @@
+/* CSS for status badges */
+.app-status-Cancel { background-color: #fef3c7; color: #b45309; } /* Amber */
+.app-status-Pause { background-color: #fedbfcff; color: #6b1eafff; } /* Purble */
+.app-status-Active { background-color: #d1fae5; color: #065f46; } /* Green */
+
+.ticket-status-Open { background-color: #fef3c7; color: #b45309; } /* Amber */
+.ticket-status-In_Progress { background-color: #dbeafe; color: #1e40af; } /* Blue */
+.ticket-status-Resolved { background-color: #d1fae5; color: #065f46; } /* Green */
+
+.status-badge { padding: 4px 8px; border-radius: 9999px; font-weight: 600; font-size: 0.8rem; }

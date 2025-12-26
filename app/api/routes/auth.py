@@ -30,14 +30,8 @@ def register(
 
     if admin_key and admin_key == ADMIN_SECRET_KEY:
         user_role = UserRole.admin
-        print("\n\n", user_role,"\n\n")
-        print("\n\n", admin_key,"\n\n")
-        print("\n\n", ADMIN_SECRET_KEY,"\n\n")
         message = "Account rigestered successfully with ADMIN permissions."
     else:
-        print("\n\n", user_role,"\n\n")
-        print("\n\n", admin_key,"\n\n")
-        print("\n\n", ADMIN_SECRET_KEY,"\n\n")
         message = "Account rigestered successfully with USER permissions."
 
     new_user = User(

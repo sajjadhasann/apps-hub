@@ -31,7 +31,17 @@ class Application(Base):
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=False, default=func.now(), onupdate=func.now())
 
-
-    accesses = relationship("UserApplicationAccess", back_populates="application")
-    tickets = relationship("Ticket", back_populates="application")
+    # cascade="all, delete-orphan"
+    # This ensures that when an Application is deleted, all related 
+    # UserApplicationAccess records are also deleted from the DB automatically.
+    accesses = relationship(
+        "UserApplicationAccess", 
+        back_populates="application",
+        cascade="all, delete-orphan"
+    )
     
+    tickets = relationship(
+        "Ticket", 
+        back_populates="application",
+        cascade="all, delete-orphan"
+    )

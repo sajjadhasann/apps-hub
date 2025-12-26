@@ -14,8 +14,10 @@ router = APIRouter(prefix="/api/tickets", tags=["Tickets"])
 # ====================================================================
 @router.get("/", response_model=List[TicketOut])
 def list_tickets(
+    dashboard: bool = Query(False, description="Set to true to filter only tickets owned by the current user"),
+    appId: Optional[int] = Query(None, description="Get all tickets of app"),
     search: Optional[str] = Query(None, description="Search by ticket title"),
-    status_filter: Optional[TicketStatus] = Query(None),
+    status: Optional[TicketStatus] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -29,8 +31,14 @@ def list_tickets(
         # Regular user filtering: only show tickets created by them
         query = query.filter(Ticket.created_by == current_user.id)
     
-    if status_filter:
-        query = query.filter(Ticket.status == status_filter)
+    if dashboard is True:
+        query = query.filter(Ticket.created_by == current_user.id)
+
+    if appId:
+        query = query.filter(Ticket.application_id == appId)
+
+    if status:
+        query = query.filter(Ticket.status == status)
 
     if search:
         search_pattern = f"%{search}%"

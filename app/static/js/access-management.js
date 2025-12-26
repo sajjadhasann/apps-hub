@@ -40,8 +40,10 @@ export async function fetchApplicationsList() {
         alert("🗿 You have no permission on this page!");
         window.location.href = "/dashboard";
     } else if (!res.ok) {
-        alert("Unauthorized");
-        throw new Error("Failed to fetch all Applications");
+        alert("⚠️ Unauthorized, login again");
+        logout();
+        window.location.href = "/login";
+        // throw new Error("Failed to fetch all Applications");
     }
     applications = await res.json();
     loadApplicationsList(applications);
@@ -85,7 +87,9 @@ export async function fetchUserById(id) {
     return await res.json();
 }
 
-
+/**
+ * Loads the application list and sets up the event listener for selection.
+ */
 export function loadApplicationsList(apps) {
     const list = document.getElementById("applicationsList");
     list.innerHTML = "";
@@ -100,7 +104,7 @@ export function loadApplicationsList(apps) {
 
         list.innerHTML += `
             <div id="app-${app.id}" class="app-item p-3 border-l-4 rounded-lg shadow-sm cursor-pointer ${isActive}" 
-                 data-id="${app.id}" data-name="${app.name}" onclick="window.selectApplicationHandler(${app.id}, '${app.name}')">
+                 data-id="${app.id}" data-name="${app.name}" onclick="window.selectApplicationHandler(${app.id}, '${app.name.replace(/'/g, "\\'")}')">
                 <div class="flex justify-between items-center">
                     <div class="font-semibold text-gray-900">${app.name}</div>
                     <div class="px-3 py-1 text-xs font-medium rounded-full ${statusColor}">
@@ -114,7 +118,7 @@ export function loadApplicationsList(apps) {
 }
 
 
-export function selectApplicationHandler(appId, appName) {
+export function selectApplicationHandler(appId, appName) {    
     if (selectedAppId) {
         const prevApp = document.getElementById(`app-${selectedAppId}`);
         if(prevApp) prevApp.classList.remove('bg-blue-100', 'border-blue-500');
@@ -143,12 +147,14 @@ export function filterAccessesForSelectedApp(appId) {
     const appAccesses = allAccesses.filter(access => access.application_id === appId);
     
     appAccesses.forEach(access => {
+        console.log("access ", access);
+        
         currentAccesses[access.user_id] = { 
             role: access.permission_level, 
             accessId: access.id 
         };
     });
-    loadUsersForApp(users); 
+    loadUsersForApp(users);     
 }
 
 
@@ -199,7 +205,7 @@ export function loadUsersForApp(filteredUsers) {
 export function renderPermissionCheckbox(role, userId, isChecked) {
     let labelClass;
     let titleText = '';
-
+    
     switch (role) {
         case 'admin':
             labelClass = 'bg-blue-500 hover:bg-blue-600';
